@@ -12,9 +12,18 @@ package javaapplication15;
  * and open the template in the editor.
  */
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static javaapplication15.logic.findBestMove;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
@@ -48,6 +57,7 @@ public class JavaApplication15 extends Application {
     String user="X";
     String computer="O";
     int level=3;
+    boolean reply=true;
     
     
     private boolean playable = true;
@@ -124,8 +134,44 @@ public class JavaApplication15 extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
          primaryStage.setScene(new Scene(createContent()));
-        primaryStage.show();
+         primaryStage.show();
+         
+         if(reply) reply();
     }
+    
+    
+    private void saveToReply(char board[][]) throws IOException{
+        File savedGame = new File("game.txt");
+        FileWriter fileWriter = new FileWriter(savedGame, false); // true to append
+        for(int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                fileWriter.write(board[j][i]);
+            }fileWriter.write("\n");
+         }
+         fileWriter.close();
+   }
+    
+ private void reply() throws FileNotFoundException{
+   Scanner sc = new Scanner(new BufferedReader(new FileReader("game.txt")));
+      char [][] myArray = new char[3][3];
+      while(sc.hasNextLine()) {
+         for (int i=0; i<myArray.length; i++) {
+             String line = sc.nextLine();
+            for (int j=0; j<line.length(); j++) {
+               myArray[i][j] = line.charAt(j);
+               if(myArray[i][j]=='x') board[j][i].drawX();
+               else if (myArray[i][j]=='o')board[j][i].drawO();
+            }
+         }
+      }
+      System.out.println("-------------reply-----------");
+      for(int i=0;i<3;i++){
+          for (int j=0;j<3;j++){
+               System.out.print(myArray[i][j]);
+          }System.out.print("\n");
+      }
+   }
+   
     
     private void checkState() {
         for (Combo combo : combos) {
@@ -194,13 +240,16 @@ public class JavaApplication15 extends Application {
                 if (event.getButton() == MouseButton.PRIMARY) {
                     if (!turnX)
                         return;
-                    
-                    passboard[passX][passY]='x';
-                    
-                    drawX();
-                    turnX = false;
-                    checkState();
-                    AITurn(level);
+                        passboard[passX][passY]='x';
+                        drawX();
+                        turnX = false;
+                        checkState();
+                        AITurn(level);
+                    try {
+                        saveToReply(passboard);
+                    } catch (IOException ex) {
+                        Logger.getLogger(JavaApplication15.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 else if (event.getButton() == MouseButton.SECONDARY) {
                     if (turnX)
