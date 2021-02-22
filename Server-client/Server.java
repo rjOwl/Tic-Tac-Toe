@@ -30,7 +30,7 @@ public class Server extends JFrame
 	
 	static void writeOnTextArea(String message)
 	{
-		text.append("Message from "+message.split(",")[0]+" to "+message.split(",")[1]+" -> "+message.split(",")[2]+"\n");
+		text.append(message.split(",")[0]+" from "+message.split(",")[1]+" -> "+message.split(",")[2]+"\n");
 	}
 	
 	public static void main(String[] args)
@@ -51,7 +51,7 @@ class ServerConnection
 	{
 		try
 		{
-			serverSocket = new ServerSocket(5000);
+			serverSocket = new ServerSocket(5005);
 			while(true)
 			{
 				Socket s = serverSocket.accept();
@@ -61,13 +61,9 @@ class ServerConnection
 		}
 		catch(IOException ex)
 		{
-			//ex.printStackTrace();
-			
+			//ex.printStackTrace();	
 		}
-	}
-	
-	
-	
+	}	
 }
 
 class ChatHandler extends Thread
@@ -82,8 +78,6 @@ class ChatHandler extends Thread
 		{
 			dis = new DataInputStream(cs.getInputStream());
 			ps = new PrintStream(cs.getOutputStream());
-			//clientVector.add(this);
-			//start();
 		}
 		catch(IOException ex)
 		{
@@ -100,19 +94,23 @@ class ChatHandler extends Thread
 			try
 			{
 				String message = dis.readLine();
-				
-				//String[] messageArray = message.split(",");
-				/*if(..)
+				if(new String(message.split(",")[0]).equals("login"))
 				{
 					
 				}
-				else
+				else if(new String(message.split(",")[0]).equals("register"))
 				{
 					
-				}*/
-				//System.out.println("Message from "+messageArray[0]+" to "+messageArray[1]+": "+messageArray[2]);
+				}
+				else if(new String(message.split(",")[0]).equals("scoreBoard"))
+				{
+					
+				}
+				else if(new String(message.split(",")[0]).equals("game"))
+				{
+					
+				}				
 				Server.writeOnTextArea(message);
-				
 				sendMessaageToAll(message);
 			}
 			catch(IOException ex)
@@ -124,12 +122,10 @@ class ChatHandler extends Thread
 	}
 	
 	void sendMessaageToAll(String msg)
-	{
-		
+	{		
 		for(ChatHandler ch : clientVector)
 		{
 			ch.ps.println(msg);
-			//System.out.println(msg);
 		}
 	}
 }

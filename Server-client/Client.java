@@ -38,7 +38,8 @@ public class Client extends JFrame
 			public void actionPerformed(ActionEvent e)
 			{
 				//text.append(sender+","+receiver+","+textField.getText());
-				newClient.ps.println(sender+","+receiver+","+textField.getText());
+				//newClient.ps.println(sender+","+receiver+","+textField.getText());
+				newClient.ps.println(textField.getText());
 				textField.setText("");
 			}	
 		});
@@ -51,12 +52,10 @@ public class Client extends JFrame
 	public static void main(String args[])
 	{
 		
-		//System.out.println(args[0]);
-		//System.out.println(args[1]);
 		Client sample = new Client(args[0]);
-		sample.sender = args[0];
-		sample.receiver = args[1];
-		text.append("I am "+sample.sender+" talking to "+sample.receiver+"\n");
+		//sample.sender = args[0];
+		//sample.receiver = args[1];
+		//text.append("I am "+sample.sender+" talking to "+sample.receiver+"\n");
 		sample.setSize(600 , 400);
 		sample.setResizable(false);
 		sample.setVisible(true);
@@ -77,7 +76,7 @@ class ClientThread extends Thread{
 	public ClientThread(String name){
 		try
 		{
-			mySocket = new Socket(InetAddress.getLocalHost() , 5000);
+			mySocket = new Socket(/*InetAddress.getLocalHost()*/ "102.47.243.156", 5005);
 			dis = new DataInputStream(mySocket.getInputStream());
 			ps = new PrintStream(mySocket.getOutputStream());
 			start();
@@ -97,16 +96,35 @@ class ClientThread extends Thread{
 			try
 			{
 				String message = dis.readLine();
-				//String[] messageArray = message.split(",");
+
 				if(new String(message.split(",")[1]).equals(myName))
 				{
-					Client.writeOnTextArea(message.split(",")[2]);
-					//Client.writeOnTextArea(message);
+					if(new String(message.split(",")[0]).equals("login"))
+					{
+						Client.writeOnTextArea(message.split(",")[2]);	
+					}
+					else if(new String(message.split(",")[0]).equals("register"))
+					{
+						Client.writeOnTextArea(message.split(",")[2]);	
+					}
+					else if(new String(message.split(",")[0]).equals("scoreBoard"))
+					{
+						int n=Integer.parseInt(message.split(",")[2]);
+						n = n * 4;
+						for(int i = 3; i < n+3; i++)
+						{
+							Client.writeOnTextArea(message.split(",")[i]);	
+						}
+							
+					}
+					
+					
+
 				}
 			}
 			catch(IOException ex)
 			{
-				//ex.printStackTrace();
+
 				System.out.println("Connection lost");
 				stop();
 			}
