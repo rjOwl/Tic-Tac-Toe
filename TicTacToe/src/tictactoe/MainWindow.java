@@ -5,12 +5,15 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -23,13 +26,15 @@ public class MainWindow extends AnchorPane {
     protected final Button button1;
     protected final Label userName;
     protected final RadioButton radioButton;
-    protected final AnchorPane anchorPane;
+    protected Pane gridPane;
     protected final ImageView imageView;
     protected final Button button2;
     protected final Button button3;
     protected final Button button4;
-    protected final TicTacToeGrid grid = new TicTacToeGrid();
-
+    protected final TicGrid grid = new TicGrid();
+    protected ComboBox comboBox = new ComboBox();
+    int level;
+    boolean AIEnabled;
     public MainWindow(Stage mainWindowScene) {
 
         buttonBar = new ButtonBar();
@@ -37,8 +42,7 @@ public class MainWindow extends AnchorPane {
         button0 = new Button();
         button1 = new Button();
         radioButton = new RadioButton();
-        anchorPane = grid.createContent();
-//        anchorPane = new AnchorPane();
+        gridPane = grid.createContent(false, false, -1);
         imageView = new ImageView();
         button2 = new Button();
         button3 = new Button();
@@ -59,9 +63,21 @@ public class MainWindow extends AnchorPane {
 
         button.setMnemonicParsing(false);
         button.setText("Play AI");
+        button.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event) {
+                AIEnabled=true;
+            }
+        });
 
         button0.setMnemonicParsing(false);
         button0.setText("Play Local");
+        button0.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event){
+                gridPane = grid.createContent(false, true, level);
+            }
+        });
 
         button1.setMnemonicParsing(false);
         button1.setText("Room");
@@ -70,7 +86,7 @@ public class MainWindow extends AnchorPane {
             public void handle(ActionEvent event) {
                 Stage w = new Stage();
                 w.initModality(Modality.APPLICATION_MODAL);
-                w.setResizable(false);
+//                w.setResizable(false);
 //                w.initStyle(StageStyle.UNDECORATED);
                 Scene s = new Scene(new roomDialogue());
                 w.setScene(s);
@@ -84,12 +100,26 @@ public class MainWindow extends AnchorPane {
 //        radioButton.setPrefHeight(17.0);
 //        radioButton.setPrefWidth(88.0);
         userName.setText("Mostafa");
-
-        anchorPane.setLayoutX(168.0);
-        anchorPane.setLayoutY(75.0);
-        anchorPane.setPrefHeight(300.0);
-        anchorPane.setPrefWidth(300.0);
-        anchorPane.setStyle("-fx-background-color: #FFFFFF;");
+        comboBox.setLayoutX(492.0);
+        comboBox.setLayoutY(27.0);
+        comboBox.setValue("Levels");
+        comboBox.getItems().add("Level 1");
+        comboBox.getItems().add("Level 2");
+        comboBox.getItems().add("Level 3");
+        comboBox.setOnAction((event) -> {
+             level = comboBox.getSelectionModel().getSelectedIndex();
+            level+=1;
+            getChildren().remove(gridPane);
+            gridPane = grid.createContent(AIEnabled, true, level);
+            getChildren().add(gridPane);
+//            System.out.println("Selection made: [" + selectedIndex + "] " + selectedItem);
+            System.out.println("   ComboBox.getValue(): " + level);
+        });
+        gridPane.setLayoutX(168.0);
+        gridPane.setLayoutY(75.0);
+        gridPane.setPrefHeight(300.0);
+        gridPane.setPrefWidth(300.0);
+        gridPane.setStyle("-fx-background-color: #FFFFFF;");
 
         button2.setLayoutX(25.0);
         button2.setLayoutY(32.0);
@@ -97,6 +127,12 @@ public class MainWindow extends AnchorPane {
         button2.setPrefHeight(40.0);
         button2.setPrefWidth(88.0);
         button2.setText("Replay game");
+        button2.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event) {
+                grid.replayGame();
+            }
+        });
 
         button3.setLayoutX(25.0);
         button3.setLayoutY(100.0);
@@ -134,9 +170,10 @@ public class MainWindow extends AnchorPane {
         buttonBar.getButtons().add(button0);
         buttonBar.getButtons().add(button1);
         getChildren().add(buttonBar);
-        getChildren().add(userName);
-//        anchorPane.getChildren().add(imageView);
-        getChildren().add(anchorPane);
+        getChildren().add(comboBox);
+//        getChildren().add(userName);
+//        gridPane.getChildren().add(imageView);
+        getChildren().add(gridPane);
         getChildren().add(button2);
         getChildren().add(button3);
         getChildren().add(button4);

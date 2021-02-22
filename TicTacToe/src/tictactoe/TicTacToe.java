@@ -29,7 +29,7 @@ public class TicTacToe extends Application {
             currentWindow = new MainWindow(stage);
         }
         Scene scene = new Scene(currentWindow);
-        stage.setResizable(false);
+//        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
