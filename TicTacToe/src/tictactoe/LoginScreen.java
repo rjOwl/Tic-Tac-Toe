@@ -20,9 +20,11 @@ public class LoginScreen extends AnchorPane {
     protected final Button button;
     protected final Button button0;
     protected final ImageView imageView;
+    static ClientThread client = new ClientThread("");
+    final Stage currentWindow; 
 
-    public LoginScreen(Stage currentWindow) {
-        
+    public LoginScreen(Stage myCurrentWindow) {
+        this.currentWindow = myCurrentWindow;
         label = new Label();
         label0 = new Label();
         textField = new TextField();
@@ -55,22 +57,27 @@ public class LoginScreen extends AnchorPane {
         button.setOnAction(new EventHandler<ActionEvent>(){
             @Override
             public void handle(ActionEvent event) {
-                if(textField.getText().equals("1") &&
-                        textField0.getText().equals("2")){
-//                Stage w = new Stage();
-                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
-//                currentWindow.setScene(s);
-//                currentWindow.close();
-//                w.show();
-                }
+                String username = textField.getText();
+                String pass = textField0.getText();
+                access(username, pass, "login");
             }
-        });
+            }
+        );
 
         button0.setLayoutX(231.0);
         button0.setLayoutY(237.0);
         button0.setMnemonicParsing(false);
         button0.setStyle("-fx-background-radius: 1em;");
         button0.setText("Sign up");
+        button0.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event) {
+                String username = textField.getText();
+                String pass = textField0.getText();
+                access(username, pass, "register");
+            }
+            }
+        );
 
         imageView.setFitHeight(400.0);
         imageView.setFitWidth(321.0);
@@ -87,6 +94,27 @@ public class LoginScreen extends AnchorPane {
         getChildren().add(button);
         getChildren().add(button0);
         getChildren().add(imageView);
-
     }
+    private void access(String username, String pass, String type){
+            client.setData(username, currentWindow);
+            client.ps.println(type+","+username+","+pass);
+            boolean answerFlag = false;
+            while(!answerFlag){
+                    System.out.println("HAAAAI");
+                if(client.OK == 1){
+                    System.out.println("OK");
+                    answerFlag=true;
+                }
+                if(client.OK == 0){
+                    System.out.println("NOT OK :(");
+                    answerFlag=true;
+                    client.OK = 2;
+                }
+            }
+            if(client.OK == 1){
+                client.OK = 2;
+                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
+                answerFlag=false;
+            }
+        }
 }

@@ -316,7 +316,6 @@ public class TicGrid {
                         } else {
                             System.out.println("hello");
                             for (Combo combo: combos) {
-
                                 combo.AI(combo);
                                 if (returntox) {
                                     turnX = true;

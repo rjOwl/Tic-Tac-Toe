@@ -18,8 +18,10 @@ import javafx.stage.Stage;
  * @author Mufasa
  */
 public class TicTacToe extends Application {
+        
     @Override
     public void start(Stage stage) throws Exception {
+        
         int yes=0;
         AnchorPane currentWindow = null;
         if(yes == 0){

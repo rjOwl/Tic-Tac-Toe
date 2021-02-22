@@ -172,7 +172,7 @@ public class MainWindow extends AnchorPane {
         buttonBar.getButtons().add(button1);
         getChildren().add(buttonBar);
         getChildren().add(comboBox);
-        getChildren().add(levelLabel);
+//        getChildren().add(levelLabel);
         //        gridPane.getChildren().add(imageView);
         getChildren().add(gridPane);
         getChildren().add(button2);
