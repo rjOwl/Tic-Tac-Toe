@@ -71,7 +71,7 @@ public class TicGrid {
     int passY = -1;
     int posX = 0;
     int posY = 0;
-    private boolean AIEnabled, optionBtnClicked;
+    private boolean AIEnabled=false, optionBtnClicked=false;
     String xoro;
 
     private List < Combo > combos = new ArrayList < > ();
@@ -79,10 +79,10 @@ public class TicGrid {
     boolean returntox = false;
 
     Pane createContent(boolean AIEnabled, boolean optionBtnClicked, int level) {
+        resetBoard();
         this.AIEnabled = AIEnabled;
         this.optionBtnClicked = optionBtnClicked;
         this.level = level;
-        //        root.setPrefSize(300, 300);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 Tile tile = new Tile();
@@ -376,5 +376,25 @@ public class TicGrid {
         public void drawO() {
             text.setText(computer);
         }
+    }
+    private void resetBoard(){
+        user = "X";
+        computer = "O";
+        level=-1;
+        playable = true;
+        turnX = true;
+        winner="";
+        board = new Tile[3][3];
+        TicGrid.passboard = new char[3][3];
+        passX = -1;
+        passY = -1;
+        posX = 0;
+        posY = 0;
+        AIEnabled=false;
+        optionBtnClicked=false;
+        xoro="";
+        combos = new ArrayList < > ();
+        firstround = true;
+        returntox = false;
     }
 }
