@@ -18,19 +18,14 @@ import javafx.stage.Stage;
  * @author Mufasa
  */
 public class Main extends Application {
-        
+
     @Override
     public void start(Stage stage) throws Exception {
-        
-        int yes=0;
-        AnchorPane currentWindow = null;
-        if(yes == 0){
-            currentWindow = new LoginScreen(stage);
-        }
-        else{
-            currentWindow = new MainWindow(stage);
-        }
+        AnchorPane currentWindow = new LoginScreen(stage);
+        currentWindow.setId("main");
+
         Scene scene = new Scene(currentWindow);
+        scene.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
         stage.setResizable(false);
         stage.setScene(scene);
         stage.show();

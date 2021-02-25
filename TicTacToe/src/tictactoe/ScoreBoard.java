@@ -10,6 +10,7 @@ public class ScoreBoard extends TableView {
     protected final TableColumn tableColumn2;
 
     public ScoreBoard() {
+
         tableColumn = new TableColumn();
         tableColumn0 = new TableColumn();
         tableColumn1 = new TableColumn();
@@ -38,5 +39,6 @@ public class ScoreBoard extends TableView {
         getColumns().add(tableColumn0);
         getColumns().add(tableColumn1);
         getColumns().add(tableColumn2);
+//        getItems().add("John"));
     }
 }

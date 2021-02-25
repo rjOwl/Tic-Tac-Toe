@@ -1,4 +1,4 @@
-package tictactoe;
+package client;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,21 +8,29 @@ import java.io.*;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-class ClientThread extends Thread {
-    Socket mySocket;
-    DataInputStream dis;
-    PrintStream ps;
-    String myName;
-    Stage currentWindow;
-    int OK=2;
+public class ClientThread extends Thread {
+    public Socket mySocket;
+    public DataInputStream dis;
+    public PrintStream ps;
+    public String myName;
+    public Stage currentWindow;
+    public int OK=2;
+    private String message;
+    private static ClientThread client = new ClientThread("");
+
     public void setData(String name, Stage currentWindow) {
         this.myName = name;
         this.currentWindow = currentWindow;
     }
 
-    public ClientThread(String name){
+    public static ClientThread getInstance(){  
+        return client;
+    }  
+
+    private ClientThread(String name){
         try {
-            mySocket = new Socket("102.47.243.156", 5005);
+            System.out.println("Calling the client thread constructor");
+            mySocket = new Socket("hossamradwan.hopto.org", 5005);
             dis = new DataInputStream(mySocket.getInputStream());
             ps = new PrintStream(mySocket.getOutputStream());
             start();
@@ -37,14 +45,16 @@ class ClientThread extends Thread {
     ClientThread() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    public String getRows(){
+        return message;
+    }
     public void run() {
         while (true) {
             try {
-                String message = dis.readLine();
+                System.out.println("In run client thread");
+                message = dis.readLine();
                 //String[] messageArray = message.split(",");
                 if (new String(message.split(",")[1]).equals(myName)){
-
                     if( new String(message.split(",")[0]).equals("login")
                         || new String(message.split(",")[0]).equals("register")){
                         if(new String(message.split(",")[2]).equals("true")) OK = 1;
@@ -55,10 +65,9 @@ class ClientThread extends Thread {
                     //scoreBoard,hossam,3,..,..,..,..,..,..,..,..,...
                     //name,win,draw,lose
                     else if(new String(message. split(",")[0]).equals("scoreBoard")){
-                        int n=Integer.parseInt(message.split(",")[2]);
-                        n = n * 4;
-                        for(int i = 3; i < n+3; i++){
-                        }
+                        System.out.println("In run client thread");
+                        System.out.println(message);
+                        OK = 1;
                     }
                     else if(true){
                         //scoreBoard,hossam,3,..,..,..,..,..,..,..,..,...

@@ -1,5 +1,9 @@
 package tictactoe;
 
+import client.ClientThread;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -17,7 +21,6 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import static tictactoe.LoginScreen.client;
 
 public class MainWindow extends AnchorPane {
     protected final ButtonBar buttonBar;
@@ -36,6 +39,8 @@ public class MainWindow extends AnchorPane {
     int level;
     protected Stage mainWindow;
     boolean AIEnabled = false, optionBtnClicked=false;
+    private ClientThread client = ClientThread.getInstance();
+
     public MainWindow(Stage mainWindowScene) {
         this.mainWindow = mainWindowScene;
         buttonBar = new ButtonBar();
@@ -147,7 +152,11 @@ public class MainWindow extends AnchorPane {
         button3.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
-                showScoreBoard("asd","Asd");
+                try {
+                    showScoreBoard("hossam");
+                } catch (IOException ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
 
@@ -193,33 +202,31 @@ public class MainWindow extends AnchorPane {
         w.showAndWait();
     }
 
-    private void showScoreBoard(String type, String username){
+    private void showScoreBoard(String username) throws IOException{
         Stage w = new Stage();
-//        client.ps.println("scoreBoard"+","+username+","+"requested");
+        client.ps.println("scoreBoard"+","+username+","+"requested");
 
-        w.initModality(Modality.APPLICATION_MODAL);
-        w.setResizable(false);
-        //                w.initStyle(StageStyle.UNDECORATED);
-        Scene s = new Scene(new ScoreBoard());
-        w.setScene(s);
-        w.showAndWait();
-//                scoreBoard,hossam,3,..,..,..,..,..,..,..,..,...
-
-
-//        boolean answerFlag = false;
-//        while(!answerFlag){
-//                System.out.println("HAAAAI");
-//            if(client.OK == 1){
-//                System.out.println("OK");
-//                answerFlag=true;
-//            }
-//            if(client.OK == 0){
-//                System.out.println("NOT OK :(");
-//                answerFlag=true;
-//                client.OK = 2;
-//            }
-//        }
+        boolean answerFlag = false;
+        while(!answerFlag){
+            if(client.OK == 1){
+                answerFlag=true;
+            }
+            if(client.OK == 0){
+                answerFlag=true;
+                client.OK = 2;
+            }
+        }
+        if(1 == 1 && client.OK == 1){
+            client.OK = 2;
+            String rows = client.getRows();
+            String row[] = rows.split(",");
+            int n = Integer.parseInt(rows.split(",")[2]);
+            n = n * 4;
+            for(int i = 3; i < n+3; i++){
+                System.out.println(row[i]);
+            }
+            answerFlag=false;
+        }
     }
-
 }
 

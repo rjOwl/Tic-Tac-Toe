@@ -1,5 +1,6 @@
 package tictactoe;
 
+import client.ClientThread;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -55,6 +56,7 @@ public class TicGrid {
     String user = "X";
     String computer = "O";
     int level;
+    private ClientThread client = ClientThread.getInstance();
 
 
     private boolean playable = true;
@@ -264,6 +266,7 @@ public class TicGrid {
                             FileOutputStream fos = new FileOutputStream("savelastgame.txt", true);
                             PrintWriter pw = new PrintWriter(fos);
                             pw.println(passX + ":" + passY);
+                            client.ps.println("play,"+client.myName+",chris,"+passX+","+passY);
                             pw.close();
                         } catch (FileNotFoundException ex) {}
                         drawX();

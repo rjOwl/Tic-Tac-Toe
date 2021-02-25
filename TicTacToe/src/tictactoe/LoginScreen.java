@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import client.ClientThread;
 
 public class LoginScreen extends AnchorPane {
 
@@ -20,11 +21,12 @@ public class LoginScreen extends AnchorPane {
     protected final Button button;
     protected final Button button0;
     protected final ImageView imageView;
-    static ClientThread client = new ClientThread("");
-    final Stage currentWindow; 
+    private ClientThread client = ClientThread.getInstance();
+
+    final Stage currentWindow;
 
     public LoginScreen(Stage myCurrentWindow) {
-        this.currentWindow = myCurrentWindow;
+        currentWindow = myCurrentWindow;
         label = new Label();
         label0 = new Label();
         textField = new TextField();
@@ -59,8 +61,10 @@ public class LoginScreen extends AnchorPane {
             public void handle(ActionEvent event) {
                 String username = textField.getText();
                 String pass = textField0.getText();
-//                access(username, pass, "login");
-                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
+                access(username, pass, "login");
+//                Scene s = new Scene(new MainWindow(currentWindow));
+//                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
+//                currentWindow.setScene(s);
             }
             }
         );
@@ -76,10 +80,14 @@ public class LoginScreen extends AnchorPane {
                 String username = textField.getText();
                 String pass = textField0.getText();
 //                access(username, pass, "register");
-                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
+                AnchorPane main = new MainWindow(currentWindow);
+                main.setId("main");
+                Scene s = new Scene(main);
+                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
+                currentWindow.setScene(s);
+//                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
             }
-            }
-        );
+        });
 
         imageView.setFitHeight(400.0);
         imageView.setFitWidth(321.0);
@@ -102,7 +110,7 @@ public class LoginScreen extends AnchorPane {
             client.ps.println(type+","+username+","+pass);
             boolean answerFlag = false;
             while(!answerFlag){
-                    System.out.println("HAAAAI");
+                System.out.println("HAAAAI");
                 if(client.OK == 1){
                     System.out.println("OK");
                     answerFlag=true;
@@ -113,12 +121,14 @@ public class LoginScreen extends AnchorPane {
                     client.OK = 2;
                 }
             }
-            if(1 == 1){
-            if(client.OK == 1){
+            if(1 == 1 && client.OK == 1){
                 client.OK = 2;
-                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
+                AnchorPane main = new MainWindow(currentWindow);
+                main.setId("main");
+                Scene s = new Scene(main);
+                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
+                currentWindow.setScene(s);
                 answerFlag=false;
-            }
         }
     }
 }
