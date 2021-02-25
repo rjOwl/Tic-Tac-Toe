@@ -1,0 +1,46 @@
+client gui
+1- join game -> start game
+      when clicked send this:
+ 		client sends: "readyGame,username,roomid"
+      player hasn't yet connected
+            server: "readyGame,hossam,true" (join room and wait for other player to connect)
+            server: "readyGame,hossam,false" (room has players)
+      other player connected
+            server: "play,hossam,chris,-1" (hossam's turn to chris)
+      playing game
+            client-to-server: "play,hossam,chris,0,0" (hossam's turn. create flag to disable clicking after playing)
+            server-to-otherClient: "play,chris,Hossam,0,0" (hossam's turn. create flag to disable clicking after playing)
+
+            client-to-server: "play,chris,hossam,2,1" (hossam's turn. create flag to disable clicking after playing)
+            server-to-otherClient: "play,hossam,chris,2,1" (hossam's turn. create flag to disable clicking after playing)
+
+      game ended:
+ 	First action:-
+            client-server: "endGame,hossam,lose" (send to server)
+            client-server: "endGame,chris,win" (send to server)
+	2nd action:-
+            new window:
+         	 buttons: [ play again - exit window ]		 
+
+		 playAgainBtn:
+		     send to server: "contGame,hossam"
+		     Either server response: 
+ 			- server-client: "readyGame,hossam,true"
+			- server-client: if other player pressed play again first: "play,hossam,chris,-1"
+			- server-client: "stopGame,hossam"
+		 exitBtn:
+		     client-server: "cancelGame,hossam"
+
+
+2- cancel button -> back to main menu:
+	client-server: "cancelGame,hossam" (hossam canceled the game)
+	server-client: 
+		- "stopGame,chris"
+		- then: window says: your opponent has left -> back to main menu
+
+
+
+5- window says: server is down -> back to login & register
+in client class will end the current game
+
+
