@@ -26,9 +26,7 @@ public class Server extends JFrame {
         text = new JTextArea(20,50);
         scrol = new JScrollPane(text);
         text.setEditable(false);
-
         //newServer = new ServerConnection();
-
         add(scrol);		
     }
 
@@ -39,12 +37,11 @@ public class Server extends JFrame {
         {
             if(obj.checkUserPassword(userName, passwd))
             {
-                message = "login,"+userName+",true";
-                     
+                obj.updatePlayerStatus(userName, "status", "online");
+                message = "login,"+userName+",true";                     
             }
             else
-            {
-                
+            {                
                 message = "login,"+userName+",false";     
             }
             Server.writeOnTextArea(message);
@@ -83,10 +80,77 @@ public class Server extends JFrame {
         Server.writeOnTextArea(message);
         ChatHandler.sendMessaageToAll(message);  
     }
+    static void startGame(Database obj, String userName, String gameId)
+    {
+        String message="";
+        /*boolean result = obj.checkIfRoomIsAvailable(gameId);
+        if(!result)
+        {
+            message="readyGame,"+userName+",false";            
+            Server.writeOnTextArea(message);
+            ChatHandler.sendMessaageToAll(message);                                
+        }*/
+        obj.setGameId(userName, gameId);
+        
+        String otherPlayer = obj.checkOtherOpponent(gameId);
+        if(new String(otherPlayer).equals("playerNotFound"))
+        {
+            message="readyGame,"+userName+",true";   
+        }
+        else
+        {
+            obj.updatePlayerStatus(userName, "isPlaying", "yes");
+            obj.updatePlayerStatus(otherPlayer, "isPlaying", "yes");
+            
+            message = "play,"+userName+","+otherPlayer+",-1";
+        }
+        Server.writeOnTextArea(message);
+        ChatHandler.sendMessaageToAll(message);  
+    }
+    static void recordScore(Database obj,String player,String result)
+    {
+        obj.updateScore(player, result);
+    }
+    static void cancelGame(Database obj, String player)
+    {
+        obj.updatePlayerStatus(player, "isPlaying", "no");
+        String otherPlayer = obj.removeGameId(player); //and return other player with same game id
+        obj.updatePlayerStatus(player, "otherPlayer", "no");
+        String message;
+        message="stopGame,"+otherPlayer;
+        Server.writeOnTextArea(message);
+        ChatHandler.sendMessaageToAll(message); 
+        
+    }
+    static void activatePlayAgain(Database obj, String player)
+    {
+        String message="";
+        obj.updatePlayerStatus(player, "playAgain", "true");
+        String otherPlayer = obj.getPlayertoPlayAgain(player); //return other player name if his playAgain = true
+        if(new String(otherPlayer).equals("playerNotReady"))
+        {
+            //server readyGame,hossam,true
+            message="readyGame,"+player+",true";
+        }
+        else
+        {
+            //play,hossam,chris,-1 
+           message="play,"+player+","+otherPlayer+"-1"; 
+           obj.updatePlayerStatus(player, "playAgain", "false");
+           obj.updatePlayerStatus(otherPlayer, "playAgain", "false");
+        }
+        Server.writeOnTextArea(message);
+        ChatHandler.sendMessaageToAll(message);  
+    }
+    static void logout(Database obj,String userName)
+    {
+        obj.updatePlayerStatus(userName, "status", "offline");      
+    }
     static void writeOnTextArea(String message)
     {
         text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]+"\n");
     }
+    
     public static void main(String[] args)
     {
         Server s1 = new Server();
@@ -166,10 +230,41 @@ class ChatHandler extends Thread
                 {
                     Server.scoreBoard(d, message.split(",")[1]);
                 }
-                else if(new String(message.split(",")[0]).equals("game"))
+                else if(new String(message.split(",")[0]).equals("readyGame"))
                 {
-
-                }				
+                    Server.startGame(d, message.split(",")[1], message.split(",")[2]);
+                }
+                else if(new String(message.split(",")[0]).equals("play"))
+                {
+                    //client play,hossam,chris,0,0                    
+                    Server.writeOnTextArea("play,"+message.split(",")[2]+","+message.split(",")[1]+
+                        ","+message.split(",")[3]+","+message.split(",")[4]+"");
+                    ChatHandler.sendMessaageToAll("play,"+message.split(",")[2]+","+message.split(",")[1]+
+                        ","+message.split(",")[3]+","+message.split(",")[4]+""); 
+                }
+                else if(new String(message.split(",")[0]).equals("endGame"))
+                {
+                    //endGame,hossam,draw
+                    Server.recordScore(d, message.split(",")[1],message.split(",")[2]);
+                    
+                }
+                else if(new String(message.split(",")[0]).equals("cancelGame"))
+                {
+                    //client cancelGame,hossam
+                    Server.cancelGame(d,message.split(",")[1]);
+                    
+                }
+                else if(new String(message.split(",")[0]).equals("contGame"))
+                {
+                    //client contGame,hossam
+                    Server.activatePlayAgain(d,message.split(",")[0]);
+                    
+                }
+                else if(new String(message.split(",")[0]).equals("logout"))
+                {
+                    Server.logout(d,message.split(",")[0]);
+                }
+                
             }
             catch(IOException ex)
             {

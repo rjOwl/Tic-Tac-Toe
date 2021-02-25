@@ -76,7 +76,8 @@ public class Database {
             String queryString = new String("select count(username) from players");
             ResultSet rs = stm.executeQuery(queryString);
             rs.next();
-            result += rs.getString(1)+",";
+            String numberOfPlayers = rs.getString(1);
+            result += numberOfPlayers+",";
             
             stm = con.createStatement();
             String queryString2 = new String("select username, win, draw, lose from players");
@@ -84,12 +85,6 @@ public class Database {
             while(rs2.next())
             {
                 result += rs2.getString(1)+","+rs2.getString(2)+","+rs2.getString(3)+","+rs2.getString(4)+",";
-                
-//                System.out.print(rs.getString(1)+" ");
-//                System.out.print(rs.getString(2)+" ");
-//                System.out.print(rs.getString(3)+" ");
-//                System.out.print(rs.getString(4));
-//                System.out.println();
             }
             result += "end";
             //System.out.print(result);
@@ -116,6 +111,21 @@ public class Database {
             ex.printStackTrace();
             return null;
         }
+    }
+    void updatePlayerStatus(String userName, String mood, String info)
+    {
+        try
+        {
+            stm= con.createStatement();
+            String queryStringUpdate = new String("UPDATE players SET "+mood+"='"+info+"' WHERE username= '"+userName+"'");
+            stm.execute(queryStringUpdate);    
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+        } 
+        
+        
     }
     void updateScore(String usrName, String result)
     {
@@ -209,31 +219,7 @@ public class Database {
         
     }
     
-    void insertInGame(String gameId, String player1, String player2 )
-    {
-        try
-        {
-            stm = con.createStatement();
-            String queryStringInsert = new String("insert into game values("+gameId+", "+player1+", "+player2+")");
-            stm.execute(queryStringInsert);
-            /*for resting***************/
-            stm = con.createStatement();
-            String queryString = new String("select * from game");
-            ResultSet rs = stm.executeQuery(queryString);
-            while(rs.next())
-            {
-                System.out.print(rs.getString(1)+" ");
-                System.out.print(rs.getString(2)+" ");
-                System.out.print(rs.getString(3));
-                System.out.println();
-            }
-            /***************************/
-        }
-        catch(SQLException ex)
-        {
-            ex.printStackTrace();
-        }
-    }
+    
     void deleteFromTable(String tblName,String clmn, String info)
     {
         try
@@ -247,6 +233,119 @@ public class Database {
         {
             ex.printStackTrace();
         } 
+    }
+    void setGameId(String userName, String gameId)
+    {
+        try
+        {
+            stm= con.createStatement();
+            String queryStringUpdate = new String("UPDATE players SET gameId = "+gameId+" WHERE username= '"+userName+"'");
+            stm.execute(queryStringUpdate);           
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();            
+        }  
+    }
+    String checkOtherOpponent(String gameId)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryString = new String("select username from players where gameId= "+gameId+" and isPlaying = 'no'");
+            ResultSet rs = stm.executeQuery(queryString);
+            rs.next(); 
+            String otherPlayer = rs.getString(1);
+            if(otherPlayer.isEmpty())
+            {
+                return "playerNotFound";
+            }
+            else
+            {
+                return otherPlayer;
+            }
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+            return "nan";
+        } 
+        
+    }
+    String removeGameId(String player)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryString = new String("select gameId from players where username= '"+player+"' and isPlaying = 'yes'");
+            ResultSet rs = stm.executeQuery(queryString);
+            rs.next(); 
+            String gameId = rs.getString(1);
+            
+            stm= con.createStatement();
+            String queryStringUpdate = new String("UPDATE players SET gameId = null WHERE username= '"+player+"'");
+            stm.execute(queryStringUpdate);  
+            
+            stm = con.createStatement();
+            String queryString2 = new String("select username from players where gameId= "+gameId+" and isPlaying = 'yes'");
+            ResultSet rs2 = stm.executeQuery(queryString2);
+            rs2.next(); 
+            String otherPlayer = rs2.getString(1);
+            
+            stm= con.createStatement();
+            String queryStringUpdate2 = new String("UPDATE players SET gameId = null WHERE username= '"+otherPlayer+"'");
+            stm.execute(queryStringUpdate2);
+            
+            
+            return otherPlayer;
+            
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+            return "nan";
+        } 
+        
+    }
+    String getPlayertoPlayAgain(String player)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryString = new String("select gameId from players where username= '"+player+"' and isPlaying = 'yes'");
+            ResultSet rs = stm.executeQuery(queryString);
+            rs.next(); 
+            String gameId = rs.getString(1);
+            
+            stm = con.createStatement();
+            String queryString2 = new String("select username from players where gameId= "+gameId+" "
+                    + "and username != '"+player+"'");
+            ResultSet rs2 = stm.executeQuery(queryString2);
+            rs2.next(); 
+            String otherPlayer = rs2.getString(1);
+            
+            stm = con.createStatement();
+            String queryString3 = new String("select playAgain from players where gameId= "+gameId+" "
+                    + "and username = '"+otherPlayer+"'");
+            ResultSet rs3 = stm.executeQuery(queryString3);
+            rs3.next(); 
+            String otherPlayerStatus = rs3.getString(1);
+            if(new String(otherPlayerStatus).equals("true"))
+            {
+                return otherPlayer;
+            }
+            else
+            {
+                return "playerNotReady";
+            }
+            
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+            return "nan";
+        }
+        
     }
     void closeConnection()
     {
