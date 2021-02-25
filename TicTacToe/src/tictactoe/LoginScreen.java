@@ -59,7 +59,8 @@ public class LoginScreen extends AnchorPane {
             public void handle(ActionEvent event) {
                 String username = textField.getText();
                 String pass = textField0.getText();
-                access(username, pass, "login");
+//                access(username, pass, "login");
+                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
             }
             }
         );
@@ -74,7 +75,8 @@ public class LoginScreen extends AnchorPane {
             public void handle(ActionEvent event) {
                 String username = textField.getText();
                 String pass = textField0.getText();
-                access(username, pass, "register");
+//                access(username, pass, "register");
+                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
             }
             }
         );
@@ -96,26 +98,27 @@ public class LoginScreen extends AnchorPane {
         getChildren().add(imageView);
     }
     private void access(String username, String pass, String type){
-//            client.setData(username, currentWindow);
-//            client.ps.println(type+","+username+","+pass);
-//            boolean answerFlag = false;
-//            while(!answerFlag){
-//                    System.out.println("HAAAAI");
-//                if(client.OK == 1){
-//                    System.out.println("OK");
-//                    answerFlag=true;
-//                }
-//                if(client.OK == 0){
-//                    System.out.println("NOT OK :(");
-//                    answerFlag=true;
-//                    client.OK = 2;
-//                }
-//            }
+            client.setData(username, currentWindow);
+            client.ps.println(type+","+username+","+pass);
+            boolean answerFlag = false;
+            while(!answerFlag){
+                    System.out.println("HAAAAI");
+                if(client.OK == 1){
+                    System.out.println("OK");
+                    answerFlag=true;
+                }
+                if(client.OK == 0){
+                    System.out.println("NOT OK :(");
+                    answerFlag=true;
+                    client.OK = 2;
+                }
+            }
             if(1 == 1){
-//            if(client.OK == 1){
+            if(client.OK == 1){
                 client.OK = 2;
                 currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
-//                answerFlag=false;
+                answerFlag=false;
             }
         }
+    }
 }
