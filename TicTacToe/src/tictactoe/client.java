@@ -20,7 +20,7 @@ class ClientThread extends Thread {
         this.currentWindow = currentWindow;
     }
 
-    public ClientThread(String name) {
+    public ClientThread(String name){
         try {
             mySocket = new Socket("102.47.243.156", 5005);
             dis = new DataInputStream(mySocket.getInputStream());
@@ -43,20 +43,26 @@ class ClientThread extends Thread {
             try {
                 String message = dis.readLine();
                 //String[] messageArray = message.split(",");
-                if (new String(message.split(",")[1]).equals(myName)) {
-                    System.out.println("first if");
-                    if(new String(message.split(",")[0]).equals("login")
-                            || new String(message.split(",")[0]).equals("register")) {
-                    System.out.println("Secnd if");
-                        if(new String(message.split(",")[2]).equals("true")){
-                            System.out.println("3rd if");
-                            OK = 1;
-//                            currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
+                if (new String(message.split(",")[1]).equals(myName)){
+
+                    if( new String(message.split(",")[0]).equals("login")
+                        || new String(message.split(",")[0]).equals("register")){
+                        if(new String(message.split(",")[2]).equals("true")) OK = 1;
+                        else OK = 0;
+                    }
+
+                    // scoreBoard,hossam,requested
+                    //scoreBoard,hossam,3,..,..,..,..,..,..,..,..,...
+                    //name,win,draw,lose
+                    else if(new String(message. split(",")[0]).equals("scoreBoard")){
+                        int n=Integer.parseInt(message.split(",")[2]);
+                        n = n * 4;
+                        for(int i = 3; i < n+3; i++){
                         }
-                        else{
-                            System.out.println("ELSE");
-                            OK = 0;
-                        }
+                    }
+                    else if(true){
+                        //scoreBoard,hossam,3,..,..,..,..,..,..,..,..,...
+                        //name,win,draw,lose
                     }
                 }
             } catch (IOException ex) {

@@ -17,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import static tictactoe.LoginScreen.client;
 
 public class MainWindow extends AnchorPane {
     protected final ButtonBar buttonBar;
@@ -33,8 +34,10 @@ public class MainWindow extends AnchorPane {
     protected final TicGrid grid = new TicGrid();
     protected ComboBox comboBox = new ComboBox();
     int level;
+    protected Stage mainWindow;
     boolean AIEnabled = false, optionBtnClicked=false;
     public MainWindow(Stage mainWindowScene) {
+        this.mainWindow = mainWindowScene;
         buttonBar = new ButtonBar();
         button = new Button();
         button0 = new Button();
@@ -72,7 +75,7 @@ public class MainWindow extends AnchorPane {
 
         button0.setMnemonicParsing(false);
         button0.setText("Play Local");
-        button0.setOnAction(new EventHandler < ActionEvent > () {
+        button0.setOnAction(new EventHandler < ActionEvent > (){
             @Override
             public void handle(ActionEvent event) {
                 handleOptions(false, true, -1);
@@ -144,13 +147,7 @@ public class MainWindow extends AnchorPane {
         button3.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
-                Stage w = new Stage();
-                w.initModality(Modality.APPLICATION_MODAL);
-                w.setResizable(false);
-                //                w.initStyle(StageStyle.UNDECORATED);
-                Scene s = new Scene(new ScoreBoard());
-                w.setScene(s);
-                w.showAndWait();
+                showScoreBoard("asd","Asd");
             }
         });
 
@@ -163,7 +160,7 @@ public class MainWindow extends AnchorPane {
         button4.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
-                mainWindowScene.setScene(new Scene(new LoginScreen(mainWindowScene)));
+                mainWindow.setScene(new Scene(new LoginScreen(mainWindow)));
             }
         });
 
@@ -195,4 +192,34 @@ public class MainWindow extends AnchorPane {
         w.setScene(s);
         w.showAndWait();
     }
+
+    private void showScoreBoard(String type, String username){
+        Stage w = new Stage();
+//        client.ps.println("scoreBoard"+","+username+","+"requested");
+
+        w.initModality(Modality.APPLICATION_MODAL);
+        w.setResizable(false);
+        //                w.initStyle(StageStyle.UNDECORATED);
+        Scene s = new Scene(new ScoreBoard());
+        w.setScene(s);
+        w.showAndWait();
+//                scoreBoard,hossam,3,..,..,..,..,..,..,..,..,...
+
+
+//        boolean answerFlag = false;
+//        while(!answerFlag){
+//                System.out.println("HAAAAI");
+//            if(client.OK == 1){
+//                System.out.println("OK");
+//                answerFlag=true;
+//            }
+//            if(client.OK == 0){
+//                System.out.println("NOT OK :(");
+//                answerFlag=true;
+//                client.OK = 2;
+//            }
+//        }
+    }
+
 }
+
