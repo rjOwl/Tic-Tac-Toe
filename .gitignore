@@ -1,6 +1,5 @@
 TicTacToe/nbproject/
 TicTacToe/build/
-TicTacToe/
 dist/
 LoginScreen1.java
 Vbox.java
@@ -13,6 +12,7 @@ build.xml
 dist/ 
 nbproject/ 
 src/javaapplication15/
+TicTacToe/src/javaapplication15/
 TicTacToe/src/tictactoe/FXMLDocument.fxml
 TicTacToe/src/tictactoe/FXMLDocumentController.java
 TicTacToe/src/tictactoe/LoginScreen1.java
