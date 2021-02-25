@@ -48,7 +48,7 @@ public class MainWindow extends AnchorPane {
         button0 = new Button();
         button1 = new Button();
         radioButton = new RadioButton();
-        gridPane = grid.createContent(false, false, -1);
+        gridPane = grid.createContent(false, false, false, -1);
         imageView = new ImageView();
         button2 = new Button();
         button3 = new Button();
@@ -73,7 +73,7 @@ public class MainWindow extends AnchorPane {
             @Override
             public void handle(ActionEvent event) {
                 handleOptions(true, false, -1);
-                grid.createContent(AIEnabled, optionBtnClicked, level);
+                grid.createContent(AIEnabled, optionBtnClicked, false, level);
                 System.out.println(AIEnabled +"\n"+optionBtnClicked+"\n"+level);
             }
         });
@@ -85,7 +85,7 @@ public class MainWindow extends AnchorPane {
             public void handle(ActionEvent event) {
                 handleOptions(false, true, -1);
                 levelLabel.setText("");
-                gridPane = grid.createContent(AIEnabled, optionBtnClicked, level);
+                gridPane = grid.createContent(AIEnabled, optionBtnClicked, false, level);
             }
         });
 
@@ -120,7 +120,7 @@ public class MainWindow extends AnchorPane {
             //            FIX THIS LOGIC 
             levelLabel.setText("Level"+level);
             handleOptions(true, true, level);
-            gridPane = grid.createContent(AIEnabled, optionBtnClicked, level);
+            gridPane = grid.createContent(AIEnabled, optionBtnClicked, false, level);
             System.out.println(AIEnabled +"\n"+optionBtnClicked+"\n"+level);
 //            System.out.println("   ComboBox.getValue(): " + level);
         });
@@ -193,11 +193,13 @@ public class MainWindow extends AnchorPane {
         this.gridPane.getChildren().clear();
     }
     private void popUpDialog(){
+        gridPane = grid.createContent(true, false, true, 1);
+
         Stage w = new Stage();
         w.initModality(Modality.APPLICATION_MODAL);
         w.setResizable(false);
         //                w.initStyle(StageStyle.UNDECORATED);
-        Scene s = new Scene(new roomDialogue());
+        Scene s = new Scene(new roomDialogue(w));
         w.setScene(s);
         w.showAndWait();
     }

@@ -13,9 +13,11 @@ public class ClientThread extends Thread {
     public DataInputStream dis;
     public PrintStream ps;
     public String myName;
+    public String opponent;
     public Stage currentWindow;
     public int OK=2;
     private String message;
+    
     private static ClientThread client = new ClientThread("");
 
     public void setData(String name, Stage currentWindow) {
@@ -26,7 +28,9 @@ public class ClientThread extends Thread {
     public static ClientThread getInstance(){  
         return client;
     }  
-
+    public static void resetClient(){
+        client = new ClientThread("");
+    }
     private ClientThread(String name){
         try {
             System.out.println("Calling the client thread constructor");
@@ -46,6 +50,9 @@ public class ClientThread extends Thread {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     public String getRows(){
+        return message;
+    }
+    public String getMessage(){
         return message;
     }
     public void run() {
@@ -69,10 +76,32 @@ public class ClientThread extends Thread {
                         System.out.println(message);
                         OK = 1;
                     }
+                    else if(new String(message. split(",")[0]).equals("readyGame")){
+                        if(new String(message. split(",")[2]).equals("true")){
+                            System.out.println(message);                        
+                            OK=1;
+                        }
+                         if(new String(message. split(",")[2]).equals("false")){
+                            System.out.println(message);
+                            OK=1;
+                        }
+                    }
+                    else if(new String(message. split(",")[0]).equals("play")){
+                        if(new String(message. split(",")[1]).equals(myName)){
+                            System.out.println(message);                        
+                            OK=1;
+                            opponent = new String(message. split(",")[2]);
+                        }
+                        else if(new String(message. split(",")[2]).equals(myName)){
+                            System.out.println(message);                        
+                            OK=1;
+                        }
+                    }
                     else if(true){
                         //scoreBoard,hossam,3,..,..,..,..,..,..,..,..,...
                         //name,win,draw,lose
                     }
+                    else;
                 }
             } catch (IOException ex) {
                 //ex.printStackTrace();

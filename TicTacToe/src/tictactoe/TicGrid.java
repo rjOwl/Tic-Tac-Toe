@@ -1,11 +1,13 @@
 package tictactoe;
 
 import client.ClientThread;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import static java.lang.Integer.parseInt;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +65,12 @@ public class TicGrid {
     int level;
     private ClientThread client = ClientThread.getInstance();
     Image img = new Image("file:///E:/Brmgyat/java/iti/project/TicTacToe/TicTacToe/src/tictactoe/tilePic.jpg");
+//    Image img = new Image("src/tictactoe/tilePic.jpg");
+//    Image img = new Image("/tilePic.png");
+//    Image img = new Image(new File("tilePic.png").toURI().toURL().toExternalForm());
+//    URL url = getClass().getResource("/drawIcon.png");
+
+//    Image img = new Image(Main.class.getResourceAsStream("drawIcon.png");
 
 
     private boolean playable = true;
@@ -82,16 +90,17 @@ public class TicGrid {
     int passY = -1;
     int posX = 0;
     int posY = 0;
-    private boolean AIEnabled=false, optionBtnClicked=false;
+    private boolean AIEnabled=false, optionBtnClicked=false, roomEnabled=false;
     String xoro;
 
     private List < Combo > combos = new ArrayList < > ();
     boolean firstround = true;
     boolean returntox = false;
 
-    Pane createContent(boolean AIEnabled, boolean optionBtnClicked, int level) {
+    Pane createContent(boolean AIEnabled, boolean optionBtnClicked, boolean roomEnabled, int level) {
         resetBoard();
         this.AIEnabled = AIEnabled;
+        this.roomEnabled = AIEnabled;
         this.optionBtnClicked = optionBtnClicked;
         this.level = level;
         for (int i = 0; i < 3; i++) {
@@ -265,9 +274,9 @@ public class TicGrid {
         //Combo complay = new Combo();
         public Tile() {
             Rectangle border = new Rectangle(100, 100);
-//            border.setFill(null);
+            border.setFill(null);
 
-            border.setFill(new ImagePattern(img));
+//            border.setFill(new ImagePattern(img));
             border.setArcWidth(70.0); 
             border.setArcHeight(50.0);
 
@@ -283,7 +292,15 @@ public class TicGrid {
                     if (event.getButton() == MouseButton.PRIMARY) {
                         if (!turnX)
                             return;
-
+                        if(roomEnabled){
+                            board[passX][passY].drawX();
+                            String msg = playNetwork(client.myName, client.opponent, passX, passY);
+                            if(!msg.isEmpty()){
+                                int x = parseInt(new String(msg. split(",")[3]));
+                                int y = parseInt(new String(msg. split(",")[4]));
+                                board[x][y].drawO();
+                            }
+                        }
                         passboard[passX][passY] = 'x';
                         try {
                             FileOutputStream fos = new FileOutputStream("savelastgame.txt", true);
@@ -300,7 +317,13 @@ public class TicGrid {
                     }
                     if (!AIEnabled) {
                         System.out.println("BALSJDLADLKASLKAD");
-                        if (event.getButton() == MouseButton.SECONDARY) {
+                        if (!roomEnabled && event.getButton() == MouseButton.SECONDARY) {
+                            if (turnX)
+                                return;
+                            drawO();
+                            turnX = true;
+                            checkState();
+                        }else{
                             if (turnX)
                                 return;
                             drawO();
@@ -416,10 +439,35 @@ public class TicGrid {
         posX = 0;
         posY = 0;
         AIEnabled=false;
+        roomEnabled = false;
         optionBtnClicked=false;
         xoro="";
         combos = new ArrayList < > ();
         firstround = true;
         returntox = false;
+    }
+    //play,hossam,chris,0,0
+    private String playNetwork(String myName, String opponent, int posX, int posY){
+        client.ps.println("play,"+myName+","+opponent+","+posX+","+posY);
+        boolean answerFlag = false;
+        while(!answerFlag){
+            System.out.println("HAAAAI");
+            if(client.OK == 1){
+                System.out.println("OK");
+                answerFlag=true;
+            }
+            if(client.OK == 0){
+                System.out.println("NOT OK :(");
+                answerFlag=true;
+                client.OK = 2;
+            }
+        }
+        if(client.OK == 1){
+            String response = client.getMessage();
+            client.OK = 2;
+            answerFlag=false;
+            return response;
+        }
+        return "";
     }
 }

@@ -121,7 +121,7 @@ public class LoginScreen extends AnchorPane {
                     client.OK = 2;
                 }
             }
-            if(1 == 1 && client.OK == 1){
+            if(client.OK == 1){
                 client.OK = 2;
                 AnchorPane main = new MainWindow(currentWindow);
                 main.setId("main");

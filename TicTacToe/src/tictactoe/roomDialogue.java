@@ -1,17 +1,30 @@
 package tictactoe;
 
+import client.ClientThread;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
 public class roomDialogue extends AnchorPane {
 
+    private ClientThread client = ClientThread.getInstance();
     protected final TextField textField;
     protected final Button button;
+    Stage roomDialog;
     protected final Label label;
+    protected Pane gridPane;
 
-    public roomDialogue() {
+    protected final TicGrid grid = new TicGrid();
+
+
+    public roomDialogue(Stage roomdialogExit) {
+        roomDialog= roomdialogExit;
         textField = new TextField();
         button = new Button();
         label = new Label();
@@ -33,6 +46,22 @@ public class roomDialogue extends AnchorPane {
         button.setLayoutY(73.0);
         button.setMnemonicParsing(false);
         button.setText("Add Room");
+         button.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event) {
+                String roomId = textField.getText();
+                play(client.myName, roomId, "readyGame");
+//                Scene s = new Scene(new MainWindow(currentWindow));
+//                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
+//                currentWindow.setScene(s);
+
+            }
+            }
+        );
+         
+         
+
+        
 
         label.setLayoutX(26.0);
         label.setLayoutY(35.0);
@@ -41,6 +70,30 @@ public class roomDialogue extends AnchorPane {
         getChildren().add(textField);
         getChildren().add(button);
         getChildren().add(label);
+    }
 
+    private void play(String username, String roomId,String type){
+            client.ps.println(type+","+username+","+roomId);
+            boolean answerFlag = false;
+            while(!answerFlag){
+                System.out.println("HAAAAI");
+                if(client.OK == 1){
+                    System.out.println("OK");
+                    answerFlag=true;
+                }
+                if(client.OK == 0){
+                    System.out.println("NOT OK :(");
+                    answerFlag=true;
+                    client.OK = 2;
+                }
+            }
+            if(client.OK == 1){
+                client.OK = 2;
+                roomDialog.close();
+                gridPane = grid.createContent(true, false, true, 1);
+                answerFlag=false;
+        }
     }
 }
+
+
