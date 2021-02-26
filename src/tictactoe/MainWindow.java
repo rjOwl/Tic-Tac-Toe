@@ -65,7 +65,7 @@ public class MainWindow extends AnchorPane {
         buttonBar.setLayoutX(168.0);
         buttonBar.setLayoutY(16.0);
         buttonBar.setPrefHeight(40.0);
-        buttonBar.setPrefWidth(250.0);
+        buttonBar.setPrefWidth(200.0);
 
         button.setMnemonicParsing(false);
         button.setText("Play AI");

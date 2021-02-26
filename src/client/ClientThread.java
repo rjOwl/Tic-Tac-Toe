@@ -76,7 +76,7 @@ public class ClientThread extends Thread {
             }
         }
     }
-        private boolean signing(String message){
+    private boolean signing(String message){
         if( message.split(",")[0].equals("login")
             || message.split(",")[0].equals("register")){
             if(new String(message.split(",")[2]).equals("true")){
@@ -119,9 +119,9 @@ public class ClientThread extends Thread {
                 OK=1;
                 opponent = new String(message. split(",")[2]);
             }
-            else if(message. split(",")[2].equals(myName)){
-                OK=1;
-            }
+//            else if(message.split(",")[2].equals(myName)){
+//                OK=1;
+//            }
             return true;
         }
         return false;

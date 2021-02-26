@@ -20,7 +20,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -34,7 +36,7 @@ import tictactoe.MainWindow.GameType;
  *
  * @author Mohamed Ali
  */
-public class TicGrid {
+public class TicGridAli{
 
     /// passing vars
     GameType gameType;
@@ -138,22 +140,22 @@ public class TicGrid {
             new KeyValue(line.endXProperty(), combo.tiles[2].getCenterX()),
             new KeyValue(line.endYProperty(), combo.tiles[2].getCenterY())));
         timeline.play();
-
-//        Stage secondStage = new Stage();
-//        winvideo = new Pane();
-//        Media videofile = new Media("file:///C:/Users/Mufasa/Videos/hi.mp4");
-//        mediaplayer = new MediaPlayer(videofile);
-//        mediaplayer.setAutoPlay(true);
-//        mediaplayer.setVolume(.9);
-//        MediaView mediaview = new MediaView(mediaplayer);
-//        mediaview.fitWidthProperty().bind(secondStage.widthProperty());
-//        mediaview.fitHeightProperty().bind(secondStage.heightProperty());
-//        root.getChildren().add(mediaview);
-//        winvideo.getChildren().addAll(mediaview);
-//        winscene = new Scene(winvideo,444,444);
-//        secondStage.setScene(winscene);
-//        secondStage.show();
-        Popup.display();
+        /*Stage secondStage = new Stage();
+        winvideo = new Pane();
+        
+        Media videofile = new Media("file:///C:/Users/Mufasa/Videos/hi.mp4");
+        mediaplayer = new MediaPlayer(videofile);
+        mediaplayer.setAutoPlay(true);
+        mediaplayer.setVolume(.9);
+        MediaView mediaview = new MediaView(mediaplayer);
+        mediaview.fitWidthProperty().bind(secondStage.widthProperty());
+        mediaview.fitHeightProperty().bind(secondStage.heightProperty());
+        root.getChildren().add(mediaview);
+        winvideo.getChildren().addAll(mediaview);
+        winscene = new Scene(winvideo,444,444);
+        secondStage.setScene(winscene);
+        secondStage.show();
+        Popup.display();*/
     }
 
     private class Combo {
@@ -357,39 +359,32 @@ public class TicGrid {
                         }
                         else if (event.getButton() == MouseButton.SECONDARY){
                             if (turnX) return;
-                            drawO();
-                            turnX = true;
+                            
+                            if (text.getText() == ""){
+                                 drawO();
+                                  turnX = true;}
                             checkState();
                         }
                         break;
                     case Room:
+                        if(checkState())
+                                break;
                         if (event.getButton() == MouseButton.PRIMARY) {
-//                            if(checkState()) break;
-//                            Platform.runLater(() -> rightClickHandler());
-//                            rightClickHandler()
-//                            if(client.IMY) board[passX][passY].drawO();
-//                            else board[passX][passY].drawX();
-
+                            
+                            rightClickHandler();
+                            if(client.IMY) board[passX][passY].drawO();
+                            else board[passX][passY].drawX();
                             String msg = playNetwork(client.myName, client.opponent, passX, passY);
                             if(!msg.isEmpty()){
-                                int x = parseInt(new String(msg.split(",")[3]));
-                                int y = parseInt(new String(msg.split(",")[4]));
-                                String turn = new String(msg.split(",")[5]);
-                                if(turn.equals(client.myName)){
-                                    board[x][y].drawX();
-                                    turnX=false;
-//                                    playable=false;
-                                checkState();
-                                }
-                                else{
-                                    board[x][y].drawO();
-                                    turnX=true;
-//                                    playable=false;
-                                    checkState();
-                                }
-//                                if(client.IMY) board[x][y].drawX();
-//                                else board[x][y].drawO();
+                                
+                                int x = parseInt(new String(msg. split(",")[3]));
+                                int y = parseInt(new String(msg. split(",")[4]));
+                                    if(client.IMY) board[x][y].drawX();
+                                        else board[x][y].drawO();
+                                    if(checkState())
+                                        break;
                             }
+                            
                         }
                         if(checkState())
                                 break;
@@ -403,7 +398,9 @@ public class TicGrid {
             if (!turnX) return;
             else{
                 passboard[passX][passY] = 'x';
-                drawX();
+//                drawX();
+                if (text.getText() == "")
+                    text.setText(user);
                 turnX = false;
                 checkState();
             }
@@ -474,7 +471,6 @@ public class TicGrid {
             String response = client.getMessage();
             client.OK = 2;
             answerFlag=false;
-            System.out.println("SERVER RESPONSE"+response);
             return response;
         }
         return "";

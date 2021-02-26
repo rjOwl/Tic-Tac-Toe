@@ -114,7 +114,7 @@ public class LoginScreen extends AnchorPane {
             client.ps.println(type+","+username+","+pass);
             boolean answerFlag = false;
             while(!answerFlag){
-                System.out.println("HAAAAI");
+                System.out.println("");
                 if(client.OK == 1){
                     System.out.println("OK");
                     answerFlag=true;
