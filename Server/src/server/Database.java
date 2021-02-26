@@ -50,14 +50,6 @@ public class Database {
             {
                 System.out.print(rs.getString(1)+" ");
                 System.out.print(rs.getString(2)+" ");
-                System.out.print(rs.getString(3)+" ");
-                System.out.print(rs.getString(4)+" ");
-                System.out.print(rs.getString(5)+" ");
-                System.out.print(rs.getString(6)+" ");
-                System.out.print(rs.getString(7)+" ");
-                System.out.print(rs.getString(8)+" ");
-                
-                
                 System.out.println();
             }
 
@@ -66,6 +58,22 @@ public class Database {
         {
             ex.printStackTrace();
         }
+    }
+    void resetUsers()
+    {
+        try
+        {
+            stm= con.createStatement();
+            String queryStringUpdate = new String("UPDATE players SET status = 'offline', isPlaying = 'no', "
+                    + "gameId = null, playAgain = 'false', threadNumber = null WHERE status = 'online' ");
+            stm.execute(queryStringUpdate); 
+            
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+        }
+        
     }
     String showScoreBoard()
     {
@@ -80,7 +88,7 @@ public class Database {
             result += numberOfPlayers+",";
             
             stm = con.createStatement();
-            String queryString2 = new String("select username, win, draw, lose from players");
+            String queryString2 = new String("select username, win, draw, lose from players order by win desc, draw desc, lose");
             ResultSet rs2 = stm.executeQuery(queryString2);
             while(rs2.next())
             {
@@ -218,7 +226,29 @@ public class Database {
         }
         
     }
-    
+    boolean checkIfRoomIsAvailable(String gameId)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryString = new String("select count(gameId) from players where gameId= "+gameId+"");
+            ResultSet rs = stm.executeQuery(queryString);
+            rs.next();
+            if(new String("2").equals(rs.getString(1)))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+            return false;  
+        }
+    }
     
     void deleteFromTable(String tblName,String clmn, String info)
     {
@@ -247,21 +277,24 @@ public class Database {
             ex.printStackTrace();            
         }  
     }
-    String checkOtherOpponent(String gameId)
+    String checkOtherOpponent(String userName, String gameId)
     {
         try
         {
             stm = con.createStatement();
-            String queryString = new String("select username from players where gameId= "+gameId+" and isPlaying = 'no'");
+            String queryString = new String("select username from players where gameId= "+gameId+" and "
+                    + "username != '"+userName+"'");
             ResultSet rs = stm.executeQuery(queryString);
-            rs.next(); 
-            String otherPlayer = rs.getString(1);
-            if(otherPlayer.isEmpty())
+            
+            
+            
+            if(!rs.next())
             {
                 return "playerNotFound";
             }
             else
             {
+                String otherPlayer = rs.getString(1);
                 return otherPlayer;
             }
         }
@@ -345,6 +378,50 @@ public class Database {
             ex.printStackTrace();
             return "nan";
         }
+        
+    }
+    void setThreadNumber(String userName, String threadNumber)
+    {
+        try
+        {
+            stm= con.createStatement();
+            String queryStringUpdate = new String("UPDATE players SET threadNumber = "+threadNumber+""
+                    + " WHERE username= '"+userName+"'");
+            stm.execute(queryStringUpdate); 
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+            
+        } 
+    }
+    String resetUserDataUsingThreadNumber(int threadNumber)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryString = new String("select username from players where threadNumber= "+threadNumber+"");
+            ResultSet rs = stm.executeQuery(queryString);
+            rs.next(); 
+            String userName = rs.getString(1);
+            
+            stm= con.createStatement();
+            String queryStringUpdate = new String("UPDATE players SET status = 'offline', isPlaying = 'no', "
+                    + "gameId = null, playAgain = 'false' where threadNumber = "+threadNumber+"");
+            stm.execute(queryStringUpdate); 
+            
+            stm= con.createStatement();
+            String queryStringUpdate1 = new String("UPDATE players SET threadNumber = null "
+                    + "where threadNumber = "+threadNumber+"");
+            stm.execute(queryStringUpdate1); 
+            return userName;
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+            return "nan";
+            
+        } 
         
     }
     void closeConnection()

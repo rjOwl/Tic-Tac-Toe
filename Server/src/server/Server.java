@@ -14,6 +14,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.net.*;
 import java.io.*; 
+import java.sql.Timestamp;
 
 public class Server extends JFrame {
     
@@ -30,14 +31,17 @@ public class Server extends JFrame {
         add(scrol);		
     }
 
-    static public void login(Database obj, String userName, String passwd)
+    static public void login(Database obj, String userName, String passwd, int threadNumber)
     {
         String message ;
         if(obj.checkIfuserExist(userName))
         {
             if(obj.checkUserPassword(userName, passwd))
             {
+                // check user status 
                 obj.updatePlayerStatus(userName, "status", "online");
+                String s=String.valueOf(threadNumber);
+                obj.setThreadNumber(userName, s);
                 message = "login,"+userName+",true";                     
             }
             else
@@ -56,7 +60,7 @@ public class Server extends JFrame {
         }        
     }
     
-    static public void register(Database obj, String userName, String password)
+    static public void register(Database obj, String userName, String password, int threadNumber)
     {
         String message ;
         if(obj.checkIfuserExist(userName))
@@ -67,6 +71,8 @@ public class Server extends JFrame {
         else
         {
             obj.insertInPlayers(userName, password, "0", "0", "0", "online", "no");
+            String s=String.valueOf(threadNumber);
+            obj.setThreadNumber(userName, s);
             message = "register,"+userName+",true";
         }
         Server.writeOnTextArea(message);
@@ -83,16 +89,17 @@ public class Server extends JFrame {
     static void startGame(Database obj, String userName, String gameId)
     {
         String message="";
-        /*boolean result = obj.checkIfRoomIsAvailable(gameId);
+        boolean result = obj.checkIfRoomIsAvailable(gameId);
         if(!result)
         {
             message="readyGame,"+userName+",false";            
             Server.writeOnTextArea(message);
-            ChatHandler.sendMessaageToAll(message);                                
-        }*/
+            ChatHandler.sendMessaageToAll(message);  
+            return;
+        }
         obj.setGameId(userName, gameId);
         
-        String otherPlayer = obj.checkOtherOpponent(gameId);
+        String otherPlayer = obj.checkOtherOpponent(userName,gameId);
         if(new String(otherPlayer).equals("playerNotFound"))
         {
             message="readyGame,"+userName+",true";   
@@ -144,15 +151,38 @@ public class Server extends JFrame {
     }
     static void logout(Database obj,String userName)
     {
-        obj.updatePlayerStatus(userName, "status", "offline");      
+        obj.updatePlayerStatus(userName, "status", "offline");    //improve it  
     }
     static void writeOnTextArea(String message)
     {
-        text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]+"\n");
+        if(new String(message.split(",")[0]).equals("play"))
+        {
+            String[] test = message.split(",");
+            int arrayLength = test.length;
+            //System.out.println(arrayLength);
+            if(arrayLength == 5)
+            {
+                text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]
+                    +" -> "+message.split(",")[3]+" -> "+message.split(",")[4]+"\n");  
+            }
+            else
+            {
+                text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]
+                    +" -> "+message.split(",")[3]+"\n");   
+            }
+            
+        }
+        else
+        {
+            text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]+"\n");
+        }
+        
     }
     
     public static void main(String[] args)
     {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        System.out.println(timestamp);
         Server s1 = new Server();
         s1.setSize(600 , 400);
         s1.setResizable(false);
@@ -160,7 +190,9 @@ public class Server extends JFrame {
         
         
         Database d1 = new Database("localhost","3306","tictactoe","root","12345");
+        d1.resetUsers();
         ServerConnection newServer = new ServerConnection(d1);
+        
         
     }   
 }
@@ -187,9 +219,11 @@ class ServerConnection
 
 class ChatHandler extends Thread
 {
+    static int counter = 0;
     DataInputStream dis;
     PrintStream ps;
     Database d;
+    int myThreadNumber;
     static Vector<ChatHandler> clientVector = new Vector<ChatHandler>();
 
     public ChatHandler(Socket cs, Database database)
@@ -199,12 +233,17 @@ class ChatHandler extends Thread
             dis = new DataInputStream(cs.getInputStream());
             ps = new PrintStream(cs.getOutputStream());
             d = database;
+            counter++;
+            myThreadNumber = counter;
+            //System.out.println(myThreadNumber);
         }
         catch(IOException ex)
         {
             ex.printStackTrace();
         }
         clientVector.add(this);
+        System.out.println(clientVector);
+        System.out.println(clientVector.size());
         start();
     }
 	
@@ -216,15 +255,15 @@ class ChatHandler extends Thread
             {
                 String message = dis.readLine();
                 Server.writeOnTextArea(message);
-                System.out.println(message);
+                //System.out.println(message);
                 if(new String(message.split(",")[0]).equals("login"))
                 {
-                   Server.login(d, message.split(",")[1], message.split(",")[2]);
+                   Server.login(d, message.split(",")[1], message.split(",")[2],this.myThreadNumber);
 
                 }
                 else if(new String(message.split(",")[0]).equals("register"))
                 {
-                    Server.register(d, message.split(",")[1], message.split(",")[2]);
+                    Server.register(d, message.split(",")[1], message.split(",")[2],this.myThreadNumber);
                 }
                 else if(new String(message.split(",")[0]).equals("scoreBoard"))
                 {
@@ -268,8 +307,16 @@ class ChatHandler extends Thread
             }
             catch(IOException ex)
             {
-                    ex.printStackTrace();
-                    stop();
+                stop();
+                //ex.printStackTrace();
+                String name = d.resetUserDataUsingThreadNumber(this.myThreadNumber);
+                System.out.println("Clien went offline");
+                Server.writeOnTextArea(""+name+",went,offline");
+                clientVector.remove(this);
+                System.out.println(clientVector);
+                System.out.println(clientVector.size());
+                
+                
             }
         }
     }
