@@ -90,7 +90,7 @@ public class roomDialogue extends AnchorPane {
             if(client.OK == 1){
                 client.OK = 2;
                 roomDialog.close();
-                gridPane = grid.createContent(true, false, true, 1);
+                gridPane = grid.createContent(true, false, true, -1);
                 answerFlag=false;
         }
     }

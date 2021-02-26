@@ -17,7 +17,7 @@ public class ClientThread extends Thread {
     public Stage currentWindow;
     public int OK=2;
     private String message;
-    
+    public boolean IMY=false;
     private static ClientThread client = new ClientThread("");
 
     public void setData(String name, Stage currentWindow) {
@@ -80,20 +80,24 @@ public class ClientThread extends Thread {
                         if(new String(message. split(",")[2]).equals("true")){
                             System.out.println(message);                        
                             OK=1;
+                            IMY=true;
                         }
-                         if(new String(message. split(",")[2]).equals("false")){
+                        if(new String(message. split(",")[3]).equals("-1")){
+                            IMY=false;                            
+                        }
+                        if(new String(message. split(",")[2]).equals("false")){
                             System.out.println(message);
                             OK=1;
                         }
                     }
                     else if(new String(message. split(",")[0]).equals("play")){
                         if(new String(message. split(",")[1]).equals(myName)){
-                            System.out.println(message);                        
+                            System.out.println(message);
                             OK=1;
                             opponent = new String(message. split(",")[2]);
                         }
                         else if(new String(message. split(",")[2]).equals(myName)){
-                            System.out.println(message);                        
+                            System.out.println(message);
                             OK=1;
                         }
                     }

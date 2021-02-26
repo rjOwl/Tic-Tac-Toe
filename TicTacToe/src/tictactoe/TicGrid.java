@@ -100,7 +100,7 @@ public class TicGrid {
     Pane createContent(boolean AIEnabled, boolean optionBtnClicked, boolean roomEnabled, int level) {
         resetBoard();
         this.AIEnabled = AIEnabled;
-        this.roomEnabled = AIEnabled;
+        this.roomEnabled = roomEnabled;
         this.optionBtnClicked = optionBtnClicked;
         this.level = level;
         for (int i = 0; i < 3; i++) {
@@ -288,16 +288,19 @@ public class TicGrid {
                 if (optionBtnClicked) {
                     if (!playable)
                         return;
-
                     if (event.getButton() == MouseButton.PRIMARY) {
                         if (!turnX)
                             return;
                         if(roomEnabled){
-                            board[passX][passY].drawX();
+                            if(client.IMY)
+                                board[passX][passY].drawO();
+                            else
+                                board[passX][passY].drawX();
                             String msg = playNetwork(client.myName, client.opponent, passX, passY);
                             if(!msg.isEmpty()){
                                 int x = parseInt(new String(msg. split(",")[3]));
                                 int y = parseInt(new String(msg. split(",")[4]));
+                                
                                 board[x][y].drawO();
                             }
                         }
@@ -306,16 +309,15 @@ public class TicGrid {
                             FileOutputStream fos = new FileOutputStream("savelastgame.txt", true);
                             PrintWriter pw = new PrintWriter(fos);
                             pw.println(passX + ":" + passY);
-//                            client.ps.println("play,"+client.myName+",chris,"+passX+","+passY);
                             pw.close();
                         } catch (FileNotFoundException ex) {}
-                        drawX();
+//                        drawX();
                         turnX = false;
                         checkState();
                         if (AIEnabled && level !=-1)
                             AITurn(level);
                     }
-                    if (!AIEnabled) {
+                    if (!AIEnabled){
                         System.out.println("BALSJDLADLKASLKAD");
                         if (!roomEnabled && event.getButton() == MouseButton.SECONDARY) {
                             if (turnX)

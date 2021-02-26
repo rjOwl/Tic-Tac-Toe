@@ -95,7 +95,7 @@ public class MainWindow extends AnchorPane {
             @Override
             public void handle(ActionEvent event) {
                 levelLabel.setText("");
-                handleOptions(false, false, -1);
+                handleOptions(false, true, -1);
                 popUpDialog();
             }
         });
@@ -119,7 +119,7 @@ public class MainWindow extends AnchorPane {
             level += 1;
             //            FIX THIS LOGIC 
             levelLabel.setText("Level"+level);
-            handleOptions(true, true, level);
+            handleOptions(false, true, level);
             gridPane = grid.createContent(AIEnabled, optionBtnClicked, false, level);
             System.out.println(AIEnabled +"\n"+optionBtnClicked+"\n"+level);
 //            System.out.println("   ComboBox.getValue(): " + level);
@@ -193,7 +193,7 @@ public class MainWindow extends AnchorPane {
         this.gridPane.getChildren().clear();
     }
     private void popUpDialog(){
-        gridPane = grid.createContent(true, false, true, 1);
+        gridPane = grid.createContent(false, true, true, -1);
 
         Stage w = new Stage();
         w.initModality(Modality.APPLICATION_MODAL);
