@@ -1,77 +1,50 @@
 package tictactoe;
 
 import client.ClientThread;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import static java.lang.Integer.parseInt;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static tictactoe.logic.findBestMove;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.application.Application;
-import static javafx.application.Application.launch;
-import static javafx.application.ConditionalFeature.FXML;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Shape;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import tictactoe.MainWindow.GameType;
 
 /**
  *
  * @author Mohamed Ali
  */
 public class TicGrid {
+//    enum GameType { AI, Local,Room, None}
+
     /// passing vars
     String user = "X";
     String computer = "O";
+    GameType gameType;
     int level;
     private ClientThread client = ClientThread.getInstance();
-    Image img = new Image("file:///E:/Brmgyat/java/iti/project/TicTacToe/TicTacToe/src/tictactoe/tilePic.jpg");
-//    Image img = new Image("src/tictactoe/tilePic.jpg");
-//    Image img = new Image("/tilePic.png");
-//    Image img = new Image(new File("tilePic.png").toURI().toURL().toExternalForm());
-//    URL url = getClass().getResource("/drawIcon.png");
-
-//    Image img = new Image(Main.class.getResourceAsStream("drawIcon.png");
-
 
     private boolean playable = true;
     private boolean turnX = true;
@@ -97,11 +70,12 @@ public class TicGrid {
     boolean firstround = true;
     boolean returntox = false;
 
-    Pane createContent(boolean AIEnabled, boolean optionBtnClicked, boolean roomEnabled, int level) {
+    Pane createContent(GameType type, int level) {
         resetBoard();
-        this.AIEnabled = AIEnabled;
-        this.roomEnabled = roomEnabled;
-        this.optionBtnClicked = optionBtnClicked;
+        gameType = type;
+//        this.AIEnabled = AIEnabled;
+//        this.roomEnabled = roomEnabled;
+//        this.optionBtnClicked = optionBtnClicked;
         this.level = level;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -285,59 +259,46 @@ public class TicGrid {
             text.setFont(Font.font(72));
             setAlignment(Pos.CENTER);
             setOnMouseClicked(event -> {
-                if (optionBtnClicked) {
+                if (gameType != GameType.None){
                     if (!playable)
                         return;
-                    if (event.getButton() == MouseButton.PRIMARY) {
-                        if (!turnX)
-                            return;
-                        if(roomEnabled){
-                            if(client.IMY)
-                                board[passX][passY].drawO();
-                            else
-                                board[passX][passY].drawX();
-                           // board[passX][passY].drawX();
-                            String msg = playNetwork(client.myName, client.opponent, passX, passY);
-                            if(!msg.isEmpty()){
-                                int x = parseInt(new String(msg. split(",")[3]));
-                                int y = parseInt(new String(msg. split(",")[4]));
-                            if(client.IMY)
-                                board[x][y].drawX();
-//                                board[passX][passY].drawO();
-                            else
-                                board[x][y].drawO();
-//                                board[passX][passY].drawX();
+                    switch(gameType){
+                        case AI:
+                            if (event.getButton() == MouseButton.PRIMARY) {
+                                rightClickHandler();
                             }
-                        }
-                        passboard[passX][passY] = 'x';
-                        try {
-                            FileOutputStream fos = new FileOutputStream("savelastgame.txt", true);
-                            PrintWriter pw = new PrintWriter(fos);
-                            pw.println(passX + ":" + passY);
-//                            client.ps.println("play,"+client.myName+",chris,"+passX+","+passY);
-                            pw.close();
-                        } catch (FileNotFoundException ex) {}
-                        //drawX();
-                        turnX = false;
-                        checkState();
-                        if (AIEnabled && level !=-1)
-                            AITurn(level);
-                    }
-                    if (!AIEnabled) {
-                        System.out.println("BALSJDLADLKASLKAD");
-                        if (!roomEnabled && event.getButton() == MouseButton.SECONDARY) {
-                            if (turnX)
-                                return;
-                            drawO();
-                            turnX = true;
-                            checkState();
-                        }else{
-                            if (turnX)
-                                return;
-                            drawO();
-                            turnX = true;
-                            checkState();
-                        }
+                            if (level !=-1 && !turnX){
+                                System.out.println("AI Turn");
+                                AITurn(level);
+                            }
+                            break;
+                        case Local:
+                            if (event.getButton() == MouseButton.PRIMARY) {
+                                rightClickHandler();
+                            }
+                            else if (event.getButton() == MouseButton.SECONDARY){
+                                if (turnX) return;
+                                drawO();
+                                turnX = true;
+                                checkState();
+                            }
+                            break;
+                        case Room:
+                            if (event.getButton() == MouseButton.PRIMARY) {
+                                rightClickHandler();
+                                if(client.IMY) board[passX][passY].drawO();
+                                else board[passX][passY].drawX();
+                                String msg = playNetwork(client.myName, client.opponent, passX, passY);
+                                if(!msg.isEmpty()){
+                                    int x = parseInt(new String(msg. split(",")[3]));
+                                    int y = parseInt(new String(msg. split(",")[4]));
+                                        if(client.IMY) board[x][y].drawX();
+                                        else board[x][y].drawO();
+                                    }
+                                break;
+                            }
+                        default:
+                        break;
                     }
                 }
             });
@@ -432,6 +393,16 @@ public class TicGrid {
         public void drawO() {
             text.setText(computer);
         }
+
+        private void rightClickHandler(){
+            if (!turnX) return;
+            else{
+                passboard[passX][passY] = 'x';
+                drawX();
+                turnX = false;
+                checkState();
+            }
+        }
     }
     private void resetBoard(){
         user = "X";
@@ -478,4 +449,5 @@ public class TicGrid {
         }
         return "";
     }
+    
 }

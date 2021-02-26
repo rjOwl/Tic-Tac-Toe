@@ -1,11 +1,7 @@
 package client;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
 import java.net.*;
 import java.io.*;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class ClientThread extends Thread {

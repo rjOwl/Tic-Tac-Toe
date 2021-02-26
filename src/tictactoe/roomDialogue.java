@@ -90,7 +90,8 @@ public class roomDialogue extends AnchorPane {
             if(client.OK == 1){
                 client.OK = 2;
                 roomDialog.close();
-                gridPane = grid.createContent(true, false, true, -1);
+                int level=-1;
+                gridPane = grid.createContent(MainWindow.GameType.AI, level=-1);
                 answerFlag=false;
         }
     }

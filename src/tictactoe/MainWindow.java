@@ -12,17 +12,14 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class MainWindow extends AnchorPane {
+    enum GameType { AI, Local,Room, None}
     protected final ButtonBar buttonBar;
     protected final Button button;
     protected final Button button0;
@@ -38,8 +35,9 @@ public class MainWindow extends AnchorPane {
     protected ComboBox comboBox = new ComboBox();
     int level;
     protected Stage mainWindow;
-    boolean AIEnabled = false, optionBtnClicked=false;
-    private ClientThread client = ClientThread.getInstance();
+    boolean showLevels = false;
+
+    private final ClientThread client = ClientThread.getInstance();
 
     public MainWindow(Stage mainWindowScene) {
         this.mainWindow = mainWindowScene;
@@ -48,7 +46,8 @@ public class MainWindow extends AnchorPane {
         button0 = new Button();
         button1 = new Button();
         radioButton = new RadioButton();
-        gridPane = grid.createContent(false, false, false, -1);
+        
+        gridPane = grid.createContent(GameType.None, level=-1);
         imageView = new ImageView();
         button2 = new Button();
         button3 = new Button();
@@ -72,9 +71,8 @@ public class MainWindow extends AnchorPane {
         button.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
-                handleOptions(true, false, -1);
-                grid.createContent(AIEnabled, optionBtnClicked, false, level);
-                System.out.println(AIEnabled +"\n"+optionBtnClicked+"\n"+level);
+                handleOptions(showLevels=true);
+                grid.createContent(GameType.AI, level=-1);
             }
         });
 
@@ -83,9 +81,9 @@ public class MainWindow extends AnchorPane {
         button0.setOnAction(new EventHandler < ActionEvent > (){
             @Override
             public void handle(ActionEvent event) {
-                handleOptions(false, true, -1);
+                handleOptions(showLevels=false);
                 levelLabel.setText("");
-                gridPane = grid.createContent(AIEnabled, optionBtnClicked, false, level);
+                gridPane = grid.createContent(GameType.Local, level=-1);
             }
         });
 
@@ -94,8 +92,7 @@ public class MainWindow extends AnchorPane {
         button1.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
-                levelLabel.setText("");
-                handleOptions(false, true, -1);
+                handleOptions(showLevels=false);
                 popUpDialog();
             }
         });
@@ -117,12 +114,9 @@ public class MainWindow extends AnchorPane {
         comboBox.setOnAction((e) -> {
             level = comboBox.getSelectionModel().getSelectedIndex();
             level += 1;
+            handleOptions(showLevels=true);
             //            FIX THIS LOGIC 
-            levelLabel.setText("Level"+level);
-            handleOptions(true, true, level);
-            gridPane = grid.createContent(AIEnabled, optionBtnClicked, false, level);
-            System.out.println(AIEnabled +"\n"+optionBtnClicked+"\n"+level);
-//            System.out.println("   ComboBox.getValue(): " + level);
+            gridPane = grid.createContent(GameType.AI, level);
         });
         gridPane.setLayoutX(168.0);
         gridPane.setLayoutY(75.0);
@@ -178,22 +172,18 @@ public class MainWindow extends AnchorPane {
         buttonBar.getButtons().add(button1);
         getChildren().add(buttonBar);
         getChildren().add(comboBox);
-//        getChildren().add(levelLabel);
-        //        gridPane.getChildren().add(imageView);
         getChildren().add(gridPane);
         getChildren().add(button2);
         getChildren().add(button3);
         getChildren().add(button4);
     }
-    private void handleOptions(boolean AIEnabled, boolean optionBtnClicked, int level){
-        this.AIEnabled = AIEnabled;
-        this.optionBtnClicked = optionBtnClicked;
-        this.level = level;
-        this.comboBox.setVisible(AIEnabled);
+  private void handleOptions(boolean showLevels){
+        this.comboBox.setVisible(showLevels);
         this.gridPane.getChildren().clear();
     }
+  
     private void popUpDialog(){
-        gridPane = grid.createContent(false, true, true,-1);
+        gridPane = grid.createContent(GameType.Room, level=-1);
 
         Stage w = new Stage();
         w.initModality(Modality.APPLICATION_MODAL);
