@@ -1,0 +1,84 @@
+#button4
+{
+-fx-background-color: 
+linear-gradient(#ffd65b, #e68400),
+linear-gradient(#ffef84, #f2ba44),
+linear-gradient(#ffea6a, #efaa22),
+linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),
+linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
+-fx-background-radius: 30;
+-fx-background-insets: 0,1,2,3,0;
+-fx-text-fill: #654b00;
+-fx-font-weight: bold;
+-fx-font-size: 14px;
+-fx-padding: 10 20 10 20;
+}
+
+#button3
+{
+-fx-background-color: 
+linear-gradient(#ffd65b, #e68400),
+linear-gradient(#ffef84, #f2ba44),
+linear-gradient(#ffea6a, #efaa22),
+linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),
+linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
+-fx-background-radius: 30;
+-fx-background-insets: 0,1,2,3,0;
+-fx-text-fill: #654b00;
+-fx-font-weight: bold;
+-fx-font-size: 14px;
+-fx-padding: 10 20 10 20;
+}
+
+
+#button2
+{
+-fx-background-color: 
+linear-gradient(#ffd65b, #e68400),
+linear-gradient(#ffef84, #f2ba44),
+linear-gradient(#ffea6a, #efaa22),
+linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),
+linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
+-fx-background-radius: 30;
+-fx-background-insets: 0,1,2,3,0;
+-fx-text-fill: #654b00;
+-fx-font-weight: bold;
+-fx-font-size: 14px;
+-fx-padding: 10 20 10 20;
+}
+
+
+#button1
+{
+-fx-background-color: 
+linear-gradient(#ffd65b, #e68400),
+linear-gradient(#ffef84, #f2ba44),
+linear-gradient(#ffea6a, #efaa22),
+linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),
+linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
+-fx-background-radius: 30;
+-fx-background-insets: 0,1,2,3,0;
+-fx-text-fill: #654b00;
+-fx-font-weight: bold;
+-fx-font-size: 14px;
+}
+
+#button0
+{
+-fx-background-color:linear-gradient(to right, #EB3349 0%, #F45C43  51%, #EB3349  100%); 
+-fx-background-radius: 30;
+-fx-background-insets: 0,1,2,3,0;
+-fx-text-fill: #ffffff;
+-fx-font-weight: bold;
+-fx-padding: 5 10 5 10;
+}
+
+#button
+{
+-fx-background-color: linear-gradient(to right, #348F50 0%, #56B4D3  51%, #348F50  100%); 
+-fx-background-radius: 30;
+-fx-background-insets: 0,1,2,3,0;
+-fx-text-fill: #ffffff;
+-fx-font-weight: bold;
+-fx-font-size: 14px;
+}
