@@ -25,7 +25,7 @@ public class Main extends Application {
         currentWindow.setId("main");
 
         Scene scene = new Scene(currentWindow);
-        scene.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
+        scene.getStylesheets().add(getClass().getResource("loginStyle.css").toString());
         stage.setResizable(false);
         stage.setScene(scene);
         stage.show();

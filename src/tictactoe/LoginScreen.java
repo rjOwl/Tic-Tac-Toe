@@ -54,7 +54,7 @@ public class LoginScreen extends AnchorPane {
         button.setLayoutX(147.0);
         button.setLayoutY(237.0);
         button.setMnemonicParsing(false);
-        button.setStyle("-fx-background-radius: 1em;");
+//        button.setStyle("-fx-background-radius: 1em;");
         button.setText("Login");
         button.setOnAction(new EventHandler<ActionEvent>(){
             @Override
@@ -72,7 +72,7 @@ public class LoginScreen extends AnchorPane {
         button0.setLayoutX(231.0);
         button0.setLayoutY(237.0);
         button0.setMnemonicParsing(false);
-        button0.setStyle("-fx-background-radius: 1em;");
+//        button0.setStyle("-fx-background-radius: 1em;");
         button0.setText("Sign up");
         button0.setOnAction(new EventHandler<ActionEvent>(){
             @Override
@@ -96,6 +96,10 @@ public class LoginScreen extends AnchorPane {
         imageView.setPickOnBounds(true);
         imageView.setPreserveRatio(true);
         imageView.setImage(new Image(getClass().getResource("logo.png").toExternalForm()));
+        button.setId("button");
+        button0.setId("button0");
+        textField.setId("textField");
+        textField0.setId("textField0");
 
         getChildren().add(label);
         getChildren().add(label0);
@@ -106,7 +110,7 @@ public class LoginScreen extends AnchorPane {
         getChildren().add(imageView);
     }
     private void access(String username, String pass, String type){
-            client.setData(username, currentWindow);
+            client.setData(username);
             client.ps.println(type+","+username+","+pass);
             boolean answerFlag = false;
             while(!answerFlag){
@@ -126,7 +130,7 @@ public class LoginScreen extends AnchorPane {
                 AnchorPane main = new MainWindow(currentWindow);
                 main.setId("main");
                 Scene s = new Scene(main);
-                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
+                s.getStylesheets().add(getClass().getResource("mainWindowStyle.css").toString());
                 currentWindow.setScene(s);
                 answerFlag=false;
         }

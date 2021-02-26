@@ -4,6 +4,7 @@ import client.ClientThread;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -36,7 +37,7 @@ public class MainWindow extends AnchorPane {
     int level;
     protected Stage mainWindow;
     boolean showLevels = false;
-
+    Thread updatableThread = null;
     private final ClientThread client = ClientThread.getInstance();
 
     public MainWindow(Stage mainWindowScene) {
@@ -64,7 +65,7 @@ public class MainWindow extends AnchorPane {
         buttonBar.setLayoutX(168.0);
         buttonBar.setLayoutY(16.0);
         buttonBar.setPrefHeight(40.0);
-        buttonBar.setPrefWidth(200.0);
+        buttonBar.setPrefWidth(250.0);
 
         button.setMnemonicParsing(false);
         button.setText("Play AI");
@@ -167,6 +168,13 @@ public class MainWindow extends AnchorPane {
             }
         });
 
+        button.setId("button");
+        button0.setId("button0");
+        button1.setId("button1");
+        button2.setId("button2");
+        button3.setId("button3");
+        button4.setId("button4");
+
         buttonBar.getButtons().add(button);
         buttonBar.getButtons().add(button0);
         buttonBar.getButtons().add(button1);
@@ -221,4 +229,4 @@ public class MainWindow extends AnchorPane {
         }
     }
 }
-
+    

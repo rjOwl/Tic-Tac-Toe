@@ -13,9 +13,9 @@ import static tictactoe.logic.findBestMove;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -37,45 +37,29 @@ import tictactoe.MainWindow.GameType;
  * @author Mohamed Ali
  */
 public class TicGrid {
-//    enum GameType { AI, Local,Room, None}
 
     /// passing vars
-    String user = "X";
-    String computer = "O";
     GameType gameType;
-    int level;
-    private ClientThread client = ClientThread.getInstance();
+    private final ClientThread client = ClientThread.getInstance();
+    private Tile[][] board = new Tile[3][3];
+    private final Pane root = new Pane();
 
-    private boolean playable = true;
-    private boolean turnX = true;
-    private String winner;
-    private Pane root = new Pane();
-
- MediaPlayer mediaplayer;
+    MediaPlayer mediaplayer;
     Pane winvideo;
     Scene winscene;
     Stage window;
 
-    private Tile[][] board = new Tile[3][3];
+    Thread updatableThread = null;
     static char passboard[][] = new char[3][3];
-
-    int passX = -1;
-    int passY = -1;
-    int posX = 0;
-    int posY = 0;
-    private boolean AIEnabled=false, optionBtnClicked=false, roomEnabled=false;
-    String xoro;
+    int level, passX = -1, passY = -1, posX = 0, posY = 0;
+    private boolean playable = true, turnX = true, firstround = true, returntox = false;
+    private String winner, user = "X", computer = "O", xoro;
 
     private List < Combo > combos = new ArrayList < > ();
-    boolean firstround = true;
-    boolean returntox = false;
 
     Pane createContent(GameType type, int level) {
         resetBoard();
         gameType = type;
-//        this.AIEnabled = AIEnabled;
-//        this.roomEnabled = roomEnabled;
-//        this.optionBtnClicked = optionBtnClicked;
         this.level = level;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -128,16 +112,17 @@ public class TicGrid {
 
     //        replayGame();
 
-    private void checkState() {
+    private boolean checkState() {
         for (Combo combo: combos) {
             if (combo.isComplete()) {
                 playable = false;
                 winner = combo.tiles[0].getValue();
                 System.out.println("the winner player is : " + winner);
                 playWinAnimation(combo);
-                break;
+                return true;
             }
         }
+        return false;
     }
 
     private void playWinAnimation(Combo combo) {
@@ -170,6 +155,7 @@ public class TicGrid {
         winscene = new Scene(winvideo,444,444);
         secondStage.setScene(winscene);
         secondStage.show();
+        Popup.display();
     }
 
     private class Combo {
@@ -245,6 +231,7 @@ public class TicGrid {
 
     private class Tile extends StackPane {
         private Text text = new Text();
+
         //Combo complay = new Combo();
         public Tile() {
             Rectangle border = new Rectangle(100, 100);
@@ -259,51 +246,10 @@ public class TicGrid {
             text.setFont(Font.font(72));
             setAlignment(Pos.CENTER);
             setOnMouseClicked(event -> {
-                if (gameType != GameType.None){
-                    if (!playable)
-                        return;
-                    switch(gameType){
-                        case AI:
-                            if (event.getButton() == MouseButton.PRIMARY) {
-                                rightClickHandler();
-                            }
-                            if (level !=-1 && !turnX){
-                                System.out.println("AI Turn");
-                                AITurn(level);
-                            }
-                            break;
-                        case Local:
-                            if (event.getButton() == MouseButton.PRIMARY) {
-                                rightClickHandler();
-                            }
-                            else if (event.getButton() == MouseButton.SECONDARY){
-                                if (turnX) return;
-                                drawO();
-                                turnX = true;
-                                checkState();
-                            }
-                            break;
-                        case Room:
-                            if (event.getButton() == MouseButton.PRIMARY) {
-                                rightClickHandler();
-                                if(client.IMY) board[passX][passY].drawO();
-                                else board[passX][passY].drawX();
-                                String msg = playNetwork(client.myName, client.opponent, passX, passY);
-                                if(!msg.isEmpty()){
-                                    int x = parseInt(new String(msg. split(",")[3]));
-                                    int y = parseInt(new String(msg. split(",")[4]));
-                                        if(client.IMY) board[x][y].drawX();
-                                        else board[x][y].drawO();
-                                    }
-                                break;
-                            }
-                        default:
-                        break;
-                    }
-                }
+                handlePlaying(gameType, event);
             });
         }
-        public void AITurn(int level) {
+        public void AITurn(int level){
             if (!playable)
                 return;
             switch (level) {
@@ -343,7 +289,6 @@ public class TicGrid {
                                 }
                             }
                         }
-
                         turnX = true;
                         checkState();
                     }
@@ -394,11 +339,59 @@ public class TicGrid {
             text.setText(computer);
         }
 
+        private void handlePlaying(GameType gameType, MouseEvent event){
+            if (gameType != GameType.None){
+                if (!playable)
+                    return;
+                switch(gameType){
+                    case AI:
+                        if (event.getButton() == MouseButton.PRIMARY) {
+                            rightClickHandler();
+                        }
+                        if (level !=-1 && !turnX){
+                            System.out.println("AI Turn");
+                            AITurn(level);
+                        }
+                        break;
+                    case Local:
+                        if (event.getButton() == MouseButton.PRIMARY) {
+                            rightClickHandler();
+                        }
+                        else if (event.getButton() == MouseButton.SECONDARY){
+                            if (turnX) return;
+                            drawO();
+                            turnX = true;
+                            checkState();
+                        }
+                        break;
+                    case Room:
+                        if(checkState())
+                                break;
+                        if (event.getButton() == MouseButton.PRIMARY) {
+                            
+                            rightClickHandler();
+                            if(client.IMY) board[passX][passY].drawO();
+                            else board[passX][passY].drawX();
+                            String msg = playNetwork(client.myName, client.opponent, passX, passY);
+                            if(!msg.isEmpty()){
+                                int x = parseInt(new String(msg. split(",")[3]));
+                                int y = parseInt(new String(msg. split(",")[4]));
+                                    if(client.IMY) board[x][y].drawX();
+                                    else board[x][y].drawO();
+                            }
+                        }
+                        break;
+                    default:
+                    break;
+                }
+            }
+        }
         private void rightClickHandler(){
             if (!turnX) return;
             else{
                 passboard[passX][passY] = 'x';
-                drawX();
+//                drawX();
+                text.setText(user);
                 turnX = false;
                 checkState();
             }
@@ -417,13 +410,37 @@ public class TicGrid {
         passY = -1;
         posX = 0;
         posY = 0;
-        AIEnabled=false;
-        roomEnabled = false;
-        optionBtnClicked=false;
+//        AIEnabled=false;
+//        roomEnabled = false;
+//        optionBtnClicked=false;
         xoro="";
         combos = new ArrayList < > ();
         firstround = true;
         returntox = false;
+    }
+    
+    private void threadHandling(String myName, String opponent, int posX, int posY){
+        Thread taskThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        double progress = 0;
+        for(int i=0; i<10; i++){
+
+           playNetwork( myName,  opponent,  posX,  posY);
+
+          progress += 0.1;
+          final double reportedProgress = progress;
+
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+//                function 
+        
+            }
+          });
+        }
+      }
+    });
     }
     //play,hossam,chris,0,0
     private String playNetwork(String myName, String opponent, int posX, int posY){
@@ -451,3 +468,28 @@ public class TicGrid {
     }
     
 }
+
+/*
+private void threadHandling(String myName, String opponent, int posX, int posY){
+        Thread taskThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        double progress = 0;
+        for(int i=0; i<10; i++){
+
+           playNetwork( myName,  opponent,  posX,  posY);
+
+          progress += 0.1;
+          final double reportedProgress = progress;
+
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+//                function 
+            }
+          });
+        }
+      }
+    });
+    }
+*/
