@@ -2,7 +2,9 @@ package client;
 
 import java.net.*;
 import java.io.*;
+import static java.lang.Integer.parseInt;
 import javafx.stage.Stage;
+import tictactoe.TicGrid;
 
 public class ClientThread extends Thread {
     public Socket mySocket;
@@ -12,8 +14,9 @@ public class ClientThread extends Thread {
     public Stage currentWindow;
     public int OK=2;
     public boolean IMY=false;
+    public int guiThreadCreated=1;
     private static ClientThread client = null;
-
+    TicGrid obj;
     public void setData(String name) {
         this.myName = name;
 //        this.currentWindow = currentWindow;
@@ -115,9 +118,33 @@ public class ClientThread extends Thread {
 
     private boolean play(String message){
         if(message.split(",")[0].equals("play")){
+//                System.out.println("PLAY: "+message);               
             if(message.split(",")[1].equals(myName)){
+                System.out.println("FOR ME: "+message);
+                if(message.split(",").length == 6){
+                    System.out.println("LENGTH 5: "+message);
+                    if(message.split(",")[5].equals("non")){
+                        System.out.println("IN CLIENT PLAYER MADE A MOVE: "+message);
+                        int x = parseInt(message.split(",")[3]);
+                        int y = parseInt(message.split(",")[4]);
+                        System.out.println("IN CLIENT PLAYER X: "+x+"  Y: "+y);
+
+                        TicGrid.drawThread(x, y);
+//                        obj.board[x][y].drawO();
+                    }
+                    else if(message.split(",")[5].equals(myName)){
+                        System.out.println("IN CLIENT PLAYER MADE A MOVE: "+message);
+                        int x = parseInt(message.split(",")[3]);
+                        int y = parseInt(message.split(",")[4]);
+                        System.out.println("IN CLIENT PLAYER X: "+x+"  Y: "+y);
+
+                        TicGrid.drawThreadO(x, y);
+//                        obj.board[x][y].drawO();
+                    }
+                }
                 OK=1;
                 opponent = new String(message. split(",")[2]);
+//                System.out.println(message);               
             }
 //            else if(message.split(",")[2].equals(myName)){
 //                OK=1;
