@@ -165,6 +165,11 @@ public class Server extends JFrame {
                 text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]
                     +" -> "+message.split(",")[3]+" -> "+message.split(",")[4]+"\n");  
             }
+            else if(arrayLength == 6)
+            {
+                text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]
+                    +" -> "+message.split(",")[3]+" -> "+message.split(",")[4]+" -> "+message.split(",")[5]+"\n");  
+            }
             else
             {
                 text.append(message.split(",")[0]+" -> "+message.split(",")[1]+" -> "+message.split(",")[2]
@@ -189,7 +194,9 @@ public class Server extends JFrame {
         s1.setVisible(true);
         
         
-        Database d1 = new Database("localhost","3306","tictactoe","root","12345");
+        //Database d1 = new Database("localhost","3306","tictactoe","root","12345");
+        Database d1 = Database.getInstance();
+                d1.showScoreBoard();
         d1.resetUsers();
         ServerConnection newServer = new ServerConnection(d1);
         
@@ -275,11 +282,16 @@ class ChatHandler extends Thread
                 }
                 else if(new String(message.split(",")[0]).equals("play"))
                 {
-                    //client play,hossam,chris,0,0                    
+                    //client play,hossam,chris,0,0
+                    Server.writeOnTextArea("play,"+message.split(",")[1]+","+message.split(",")[2]+
+                        ","+message.split(",")[3]+","+message.split(",")[4]+","+message.split(",")[1]+"");
+                    ChatHandler.sendMessaageToAll("play,"+message.split(",")[1]+","+message.split(",")[2]+
+                        ","+message.split(",")[3]+","+message.split(",")[4]+","+message.split(",")[1]+""); 
+                    
                     Server.writeOnTextArea("play,"+message.split(",")[2]+","+message.split(",")[1]+
-                        ","+message.split(",")[3]+","+message.split(",")[4]+"");
+                        ","+message.split(",")[3]+","+message.split(",")[4]+",non");
                     ChatHandler.sendMessaageToAll("play,"+message.split(",")[2]+","+message.split(",")[1]+
-                        ","+message.split(",")[3]+","+message.split(",")[4]+""); 
+                        ","+message.split(",")[3]+","+message.split(",")[4]+",non"); 
                 }
                 else if(new String(message.split(",")[0]).equals("endGame"))
                 {
@@ -307,16 +319,15 @@ class ChatHandler extends Thread
             }
             catch(IOException ex)
             {
-                stop();
+                
                 //ex.printStackTrace();
                 String name = d.resetUserDataUsingThreadNumber(this.myThreadNumber);
                 System.out.println("Clien went offline");
                 Server.writeOnTextArea(""+name+",went,offline");
                 clientVector.remove(this);
                 System.out.println(clientVector);
-                System.out.println(clientVector.size());
-                
-                
+                System.out.println(clientVector.size()); 
+                stop();
             }
         }
     }

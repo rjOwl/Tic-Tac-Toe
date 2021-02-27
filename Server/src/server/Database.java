@@ -19,8 +19,9 @@ public class Database {
     
     Statement stm;
     Connection con;
-
-    public Database(String ipAddress, String portNumber, String DbName, String usrName, String paswrd)
+    
+    private static Database s = null;  
+    private/*public */Database(String ipAddress, String portNumber, String DbName, String usrName, String paswrd)
     {
         try
         {
@@ -37,6 +38,14 @@ public class Database {
                 ex.printStackTrace();
         }
 
+    }
+    public static synchronized Database getInstance() 
+    {
+      if (s== null)
+      {
+           s = new Database("localhost","3306","tictactoe","root","12345"); 
+      }
+      return s; 
     }
     void selectFromDB(String tblName)
     {
@@ -95,7 +104,7 @@ public class Database {
                 result += rs2.getString(1)+","+rs2.getString(2)+","+rs2.getString(3)+","+rs2.getString(4)+",";
             }
             result += "end";
-            //System.out.print(result);
+            System.out.print(result);
             return result;
         }
         catch(SQLException ex)
@@ -418,7 +427,8 @@ public class Database {
         }
         catch(SQLException ex)
         {
-            ex.printStackTrace();
+            //ex.printStackTrace();
+            System.out.println("No user loged in or registered");
             return "nan";
             
         } 
