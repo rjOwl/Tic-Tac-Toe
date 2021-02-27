@@ -43,7 +43,7 @@ public class TicGridAli{
     private final ClientThread client = ClientThread.getInstance();
     private Tile[][] board = new Tile[3][3];
     private final Pane root = new Pane();
-
+    public Text text = new Text();
     MediaPlayer mediaplayer;
     Pane winvideo;
     Scene winscene;
@@ -229,9 +229,9 @@ public class TicGridAli{
     }
 
 
-    private class Tile extends StackPane {
-        private Text text = new Text();
-
+    class Tile extends StackPane {
+//        text ;
+//        tileText = text;
         //Combo complay = new Combo();
         public Tile() {
             Rectangle border = new Rectangle(100, 100);

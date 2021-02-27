@@ -48,6 +48,7 @@ public class MainWindow extends AnchorPane {
         button1 = new Button();
         radioButton = new RadioButton();
         
+//        gridPane = grid.createContent(GameType.None, level=-1, 0);
         gridPane = grid.createContent(GameType.None, level=-1);
         imageView = new ImageView();
         button2 = new Button();
@@ -73,7 +74,8 @@ public class MainWindow extends AnchorPane {
             @Override
             public void handle(ActionEvent event) {
                 handleOptions(showLevels=true);
-                grid.createContent(GameType.AI, level=-1);
+//                grid.createContent(GameType.AI, level=-1, 1);
+                client.guiThreadCreated=1;
             }
         });
 
@@ -84,7 +86,8 @@ public class MainWindow extends AnchorPane {
             public void handle(ActionEvent event) {
                 handleOptions(showLevels=false);
                 levelLabel.setText("");
-                gridPane = grid.createContent(GameType.Local, level=-1);
+//                gridPane = grid.createContent(GameType.Local, level=-1);
+                client.guiThreadCreated=1;
             }
         });
 
@@ -117,7 +120,8 @@ public class MainWindow extends AnchorPane {
             level += 1;
             handleOptions(showLevels=true);
             //            FIX THIS LOGIC 
-            gridPane = grid.createContent(GameType.AI, level);
+//            gridPane = grid.createContent(GameType.AI, level);
+            client.guiThreadCreated=1;
         });
         gridPane.setLayoutX(168.0);
         gridPane.setLayoutY(75.0);
@@ -200,6 +204,7 @@ public class MainWindow extends AnchorPane {
         Scene s = new Scene(new roomDialogue(w));
         w.setScene(s);
         w.showAndWait();
+        client.guiThreadCreated=0;
     }
 
     private void showScoreBoard(String username) throws IOException{

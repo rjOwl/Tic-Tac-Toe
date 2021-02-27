@@ -1,19 +1,26 @@
 package tictactoe;
 
 import client.ClientThread;
+import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import static java.lang.Integer.parseInt;
+import java.security.Provider.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static tictactoe.logic.findBestMove;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseButton;
@@ -35,25 +42,36 @@ import tictactoe.MainWindow.GameType;
  * @author Mohamed Ali
  */
 public class TicGrid {
-
-    /// passing vars
     GameType gameType;
-    private final ClientThread client = ClientThread.getInstance();
-    private Tile[][] board = new Tile[3][3];
-    private final Pane root = new Pane();
+    public final ClientThread client = ClientThread.getInstance();
+    public static Tile[][] board = new Tile[3][3];
+    public final Pane root = new Pane();
+//    public Text text = new Text();
 
     MediaPlayer mediaplayer;
     Pane winvideo;
     Scene winscene;
     Stage window;
+    public DataInputStream dis;
 
     Thread updatableThread = null;
     static char passboard[][] = new char[3][3];
     int level, passX = -1, passY = -1, posX = 0, posY = 0;
-    private boolean playable = true, turnX = true, firstround = true, returntox = false;
-    private String winner, user = "X", computer = "O", xoro;
+    public boolean playable = true, turnX = true, firstround = true, returntox = false;
+    public String winner, user = "X", computer = "O", xoro;
 
-    private List < Combo > combos = new ArrayList < > ();
+    public List < Combo > combos = new ArrayList < > ();
+    String message;
+
+    public static void drawThread(int x, int y){
+        board[x][y].drawX();
+//        checkState();
+    }
+
+    public static void drawThreadO(int x, int y){
+        board[x][y].drawO();
+        
+    }
 
     Pane createContent(GameType type, int level) {
         resetBoard();
@@ -110,7 +128,7 @@ public class TicGrid {
 
     //        replayGame();
 
-    private boolean checkState() {
+    public boolean checkState() {
         for (Combo combo: combos) {
             if (combo.isComplete()) {
                 playable = false;
@@ -123,7 +141,7 @@ public class TicGrid {
         return false;
     }
 
-    private void playWinAnimation(Combo combo) {
+    public void playWinAnimation(Combo combo) {
         Line line = new Line();
         line.setStartX(combo.tiles[0].getCenterX());
         line.setStartY(combo.tiles[0].getCenterY());
@@ -156,8 +174,8 @@ public class TicGrid {
         Popup.display();
     }
 
-    private class Combo {
-        private Tile[] tiles;
+    public class Combo {
+        public Tile[] tiles;
         public Combo(Tile...tiles) {
             this.tiles = tiles;
         }
@@ -227,9 +245,8 @@ public class TicGrid {
     }
 
 
-    private class Tile extends StackPane {
-        private Text text = new Text();
-
+    public class Tile extends StackPane {
+        Text text = new Text();
         //Combo complay = new Combo();
         public Tile() {
             Rectangle border = new Rectangle(100, 100);
@@ -329,7 +346,7 @@ public class TicGrid {
             return text.getText();
         }
 
-        private void drawX() {
+        public void drawX() {
             text.setText(user);
         }
 
@@ -337,7 +354,7 @@ public class TicGrid {
             text.setText(computer);
         }
 
-        private void handlePlaying(GameType gameType, MouseEvent event){
+        public void handlePlaying(GameType gameType, MouseEvent event){
             if (gameType != GameType.None){
                 if (!playable)
                     return;
@@ -372,6 +389,8 @@ public class TicGrid {
 
                             String msg = playNetwork(client.myName, client.opponent, passX, passY);
                             if(!msg.isEmpty()){
+                                if(msg.length() != 6)
+                                    break;
                                 int x = parseInt(new String(msg.split(",")[3]));
                                 int y = parseInt(new String(msg.split(",")[4]));
                                 String turn = new String(msg.split(",")[5]);
@@ -399,7 +418,7 @@ public class TicGrid {
                 }
             }
         }
-        private void rightClickHandler(){
+        public void rightClickHandler(){
             if (!turnX) return;
             else{
                 passboard[passX][passY] = 'x';
@@ -409,7 +428,7 @@ public class TicGrid {
             }
         }
     }
-    private void resetBoard(){
+    public void resetBoard(){
         user = "X";
         computer = "O";
         level=-1;
@@ -431,7 +450,7 @@ public class TicGrid {
         returntox = false;
     }
     
-    private void threadHandling(String myName, String opponent, int posX, int posY){
+    public void threadHandling(String myName, String opponent, int posX, int posY){
         Thread taskThread = new Thread(new Runnable() {
       @Override
       public void run() {
@@ -455,7 +474,7 @@ public class TicGrid {
     });
     }
     //play,hossam,chris,0,0
-    private String playNetwork(String myName, String opponent, int posX, int posY){
+    public String playNetwork(String myName, String opponent, int posX, int posY){
         client.ps.println("play,"+myName+","+opponent+","+posX+","+posY);
         boolean answerFlag = false;
         while(!answerFlag){
@@ -483,7 +502,7 @@ public class TicGrid {
 }
 
 /*
-private void threadHandling(String myName, String opponent, int posX, int posY){
+public void threadHandling(String myName, String opponent, int posX, int posY){
         Thread taskThread = new Thread(new Runnable() {
       @Override
       public void run() {

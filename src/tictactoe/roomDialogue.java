@@ -91,7 +91,8 @@ public class roomDialogue extends AnchorPane {
                 client.OK = 2;
                 roomDialog.close();
                 int level=-1;
-                gridPane = grid.createContent(MainWindow.GameType.AI, level=-1);
+                gridPane = grid.createContent(MainWindow.GameType.Room, level=-1);
+//                client.guiThreadCreated=0;
                 answerFlag=false;
         }
     }
