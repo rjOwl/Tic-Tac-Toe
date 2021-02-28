@@ -8,7 +8,6 @@ package server;
 import java.net.*;
 import java.io.*;
 import java.util.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -20,7 +19,6 @@ public class Server extends JFrame {
     
     static JTextArea text;	
     JScrollPane scrol;
-    static Vector<String> games = new Vector<String>();
     
     public Server()
     {
@@ -111,162 +109,11 @@ public class Server extends JFrame {
             obj.updatePlayerStatus(otherPlayer, "isPlaying", "yes");
             
             message = "play,"+userName+","+otherPlayer+",-1";
-            
-            games.add(userName+","+otherPlayer);
-            obj.saveVectorIndex(gameId, Integer.toString(games.size()));
         }
         Server.writeOnTextArea(message);
         ChatHandler.sendMessaageToAll(message);  
     }
-    static void processGameToDetectResult(Database obj,String player, String xPosition, String yPosition)
-    {
-        
-        String roomId = obj.getRoomIdByPlayer(player);
-        String vectorI = obj.getVectorIndex(roomId);
-        int vectorIndex = Integer.parseInt(vectorI);
-        String moves = games.get(vectorIndex-1);
-        String latestMoves = moves+","+player+","+xPosition+","+yPosition;
-        String []movesArray = latestMoves.split(",");
-        for(String o: movesArray)
-        {
-            System.out.print(o + ",");
-        }
-        System.out.print(" ");
-        String []positions = {"0","1","2","3","4","5","6","7","8"};
-        for(int i = 2; i < movesArray.length; i+=3)
-        {
-            if(new String(movesArray[i+1]).equals("0") && new String(movesArray[i+1]).equals("0"))
-            {
-                positions[0] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("0") && new String(movesArray[i+1]).equals("1"))
-            {
-                positions[3] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("0") && new String(movesArray[i+1]).equals("2"))
-            {
-                positions[6] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("1") && new String(movesArray[i+1]).equals("0"))
-            {
-                positions[1] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("1") && new String(movesArray[i+1]).equals("1"))
-            {
-                positions[4] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("1") && new String(movesArray[i+1]).equals("2"))
-            {
-                positions[7] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("2") && new String(movesArray[i+1]).equals("0"))
-            {
-                positions[2] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("1") && new String(movesArray[i+1]).equals("1"))
-            {
-                positions[5] = movesArray[i];
-            }
-            if(new String(movesArray[i+1]).equals("2") && new String(movesArray[i+1]).equals("2"))
-            {
-                positions[8] = movesArray[i];
-            }           
-        }
-        for(String p: positions)
-        {
-            System.out.print(p + ",");
-        }
-        String message1="";
-        String message2="";
-        
-        if(new String(positions[0]).equals(positions[1])
-                && new String(positions[1]).equals(positions[2]))
-        {
-            if(new String(positions[0]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(new String(positions[3]).equals(positions[4])
-                && new String(positions[4]).equals(positions[5]))
-        {
-            if(new String(positions[5]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(new String(positions[6]).equals(positions[7])
-                && new String(positions[7]).equals(positions[8]))
-        {
-            if(new String(positions[6]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(new String(positions[0]).equals(positions[3])
-                && new String(positions[3]).equals(positions[6]))
-        {
-            if(new String(positions[0]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(new String(positions[1]).equals(positions[4])
-                && new String(positions[4]).equals(positions[7]))
-        {
-            if(new String(positions[1]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(new String(positions[2]).equals(positions[5])
-                && new String(positions[5]).equals(positions[8]))
-        {
-            if(new String(positions[2]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(new String(positions[0]).equals(positions[4])
-                && new String(positions[4]).equals(positions[8]))
-        {
-            if(new String(positions[0]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(new String(positions[2]).equals(positions[4])
-                && new String(positions[4]).equals(positions[6]))
-        {
-            if(new String(positions[2]).equals(movesArray[0]))
-            {
-                message1 = "result,"+movesArray[0]+"win";
-                message2 = "result,"+movesArray[1]+"lose";
-            }  
-        }
-        else if(movesArray.length == 29)
-        {
-            message1 = "result,"+movesArray[0]+"draw";
-            message2 = "result,"+movesArray[1]+"draw";   
-        }
-        else
-        {
-            message1 = movesArray[0]+","+movesArray[1]+",stillPlaying";
-            message2 = movesArray[0]+","+movesArray[1]+",stillPlaying";
-        }
-        games.set(vectorIndex-1, latestMoves);
-        Server.writeOnTextArea(message1);
-        ChatHandler.sendMessaageToAll(message1); 
-        Server.writeOnTextArea(message2);
-        ChatHandler.sendMessaageToAll(message2);
-    }
+    
     static void recordScore(Database obj,String player,String result)
     {
         obj.updateScore(player, result);
@@ -326,14 +173,7 @@ public class Server extends JFrame {
     {
         obj.updatePlayerStatus(userName, "status", "offline");    //improve it  
     }
-    static void replayGame(Database obj,String userName,int counter)
-    {
-        String Room = obj.getRoomIdByPlayer(userName);
-        int index = Integer.parseInt(obj.getVectorIndex(Room));
-        String moves = games.get(index);
-        String []movesArray = moves.split(",");       
-        ChatHandler.sendMessaageToAll("replayGame,"+userName+","+movesArray[counter]+","+movesArray[counter+1]); 
-    }
+    
     static void writeOnTextArea(String message)
     {
         if(new String(message.split(",")[0]).equals("play"))
@@ -360,8 +200,7 @@ public class Server extends JFrame {
         }
         else if(new String(message.split(",")[0]).equals("cancelGame") || 
                 new String(message.split(",")[0]).equals("contGame") ||
-                new String(message.split(",")[0]).equals("logout") ||
-                new String(message.split(",")[0]).equals("replayGame"))
+                new String(message.split(",")[0]).equals("logout") )
         {
             text.append(message.split(",")[0]+" -> "+message.split(",")[1]+"\n");
         }
@@ -386,9 +225,7 @@ public class Server extends JFrame {
         Database d1 = Database.getInstance();
                 d1.showScoreBoard();
         d1.resetUsers();
-        ServerConnection newServer = new ServerConnection(d1);
-        
-        
+        ServerConnection newServer = new ServerConnection(d1);  
     }   
 }
 class ServerConnection
@@ -430,7 +267,6 @@ class ChatHandler extends Thread
             d = database;
             counter++;
             myThreadNumber = counter;
-            //System.out.println(myThreadNumber);
         }
         catch(IOException ex)
         {
@@ -472,7 +308,6 @@ class ChatHandler extends Thread
                 else if(new String(message.split(",")[0]).equals("play"))
                 {
                     //client play,hossam,chris,0,0
-                    Server.processGameToDetectResult(d,message.split(",")[1], message.split(",")[3], message.split(",")[4]);
                     Server.writeOnTextArea("play,"+message.split(",")[1]+","+message.split(",")[2]+
                         ","+message.split(",")[3]+","+message.split(",")[4]+","+message.split(",")[1]+"");
                     ChatHandler.sendMessaageToAll("play,"+message.split(",")[1]+","+message.split(",")[2]+
@@ -506,27 +341,8 @@ class ChatHandler extends Thread
                 }
                 else if(new String(message.split(",")[0]).equals("logout"))
                 {
-                    Server.logout(d,message.split(",")[0]);
+                    Server.logout(d,message.split(",")[1]);
                 }
-                else if(new String(message.split(",")[0]).equals("replay"))
-                {
-                    //Server.writeOnTextArea("replay"+);
-                    //ChatHandler.sendMessaageToAll(message); 
-//                    for(int i = 3; i< 29; i+=2)
-//                    {
-//                       Server.replayGame(d,message.split(",")[1],i); 
-//                       try
-//			{
-//                            Thread.sleep(2000);
-//			}
-//			catch (Exception e)
-//			{
-//				
-//			}
-//                    }
-
-                }
-                
             }
             catch(IOException ex)
             {

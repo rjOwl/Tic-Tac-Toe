@@ -47,27 +47,6 @@ public class Database {
       }
       return s; 
     }
-    void selectFromDB(String tblName)
-    {
-        try
-        {
-            stm = con.createStatement();
-            String queryString = new String("select * from "+tblName+"");
-            ResultSet rs = stm.executeQuery(queryString);
-            
-            while(rs.next())
-            {
-                System.out.print(rs.getString(1)+" ");
-                System.out.print(rs.getString(2)+" ");
-                System.out.println();
-            }
-
-        }
-        catch(SQLException ex)
-        {
-            ex.printStackTrace();
-        }
-    }
     void resetUsers()
     {
         try
@@ -259,20 +238,6 @@ public class Database {
         }
     }
     
-    void deleteFromTable(String tblName,String clmn, String info)
-    {
-        try
-        {
-            stm = con.createStatement();
-            //String queryStringDelete = new String("delete from "+tblName+"where "+clmn+"="+info);
-            String queryStringDelete = new String("delete from "+tblName+" where "+clmn+"="+info);
-            stm.execute(queryStringDelete);
-        }
-        catch(SQLException ex)
-        {
-            ex.printStackTrace();
-        } 
-    }
     void setGameId(String userName, String gameId)
     {
         try
@@ -431,41 +396,7 @@ public class Database {
             System.out.println("No user loged in or registered");
             return "nan";
             
-        } 
-        
-    }
-    void saveVectorIndex(String gameId, String vectorIndex)
-    {
-        try
-        {
-            stm = con.createStatement();
-            String queryStringInsert = new 
-                String("insert into gameIdVectorIndex values ("+gameId+","+vectorIndex+")");
-            stm.execute(queryStringInsert);
-        }
-        catch(SQLException ex)
-        {
-            ex.printStackTrace();
-            
-        }       
-    }
-    String getVectorIndex (String gameId)
-    {
-        try
-        {
-            stm = con.createStatement();
-            String queryString = new String("select vIndex from gameIdVectorIndex where gId= "+gameId+"");
-            ResultSet rs = stm.executeQuery(queryString);
-            rs.next(); 
-            String vectorIndex = rs.getString(1);
-            return vectorIndex;
-        }
-        catch(SQLException ex)
-        {
-            //ex.printStackTrace();
-            System.out.println("No user loged in or registered");
-            return "nan";
-        } 
+        }  
     }
     String getRoomIdByPlayer(String player)
     {
@@ -483,8 +414,7 @@ public class Database {
             //ex.printStackTrace();
             System.out.println("No user loged in or registered");
             return "nan";
-        } 
-        
+        }        
     }
     void closeConnection()
     {
@@ -497,7 +427,5 @@ public class Database {
         {
             ex.printStackTrace();
         }
-    }
-    
-    
+    }   
 }
