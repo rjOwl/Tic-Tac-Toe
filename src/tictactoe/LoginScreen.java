@@ -65,7 +65,7 @@ public class LoginScreen extends AnchorPane {
 //                Scene s = new Scene(new MainWindow(currentWindow));
 //                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
 //                currentWindow.setScene(s);
-            }
+                }
             }
         );
 
@@ -79,13 +79,13 @@ public class LoginScreen extends AnchorPane {
             public void handle(ActionEvent event) {
                 String username = textField.getText();
                 String pass = textField0.getText();
-//                access(username, pass, "register");
-                AnchorPane main = new MainWindow(currentWindow);
-                main.setId("main");
-                Scene s = new Scene(main);
-                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
-                currentWindow.setScene(s);
-                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
+                access(username, pass, "register");
+//                AnchorPane main = new MainWindow(currentWindow);
+//                main.setId("main");
+//                Scene s = new Scene(main);
+//                s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
+//                currentWindow.setScene(s);
+//                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
             }
         });
 

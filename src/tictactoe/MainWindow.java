@@ -49,7 +49,7 @@ public class MainWindow extends AnchorPane {
         button0 = new Button();
         button1 = new Button();
         radioButton = new RadioButton();
-        
+
 //        gridPane = grid.createContent(GameType.None, level=-1, 0);
         gridPane = grid.createContent(GameType.None, level=-1);
         imageView = new ImageView();
@@ -123,7 +123,7 @@ public class MainWindow extends AnchorPane {
             level = comboBox.getSelectionModel().getSelectedIndex();
             level += 1;
             handleOptions(showLevels=true);
-            //            FIX THIS LOGIC 
+            //            FIX THIS LOGIC
             gridPane = grid.createContent(GameType.AI, level);
             client.guiThreadCreated=1;
         });
@@ -137,7 +137,7 @@ public class MainWindow extends AnchorPane {
         button2.setLayoutY(32.0);
         button2.setMnemonicParsing(false);
         button2.setPrefHeight(40.0);
-        button2.setPrefWidth(88.0);
+        button2.setPrefWidth(120.0);
         button2.setText("Replay game");
         button2.setOnAction(new EventHandler < ActionEvent > () {
             @Override
@@ -153,7 +153,7 @@ public class MainWindow extends AnchorPane {
         button3.setLayoutY(100.0);
         button3.setMnemonicParsing(false);
         button3.setPrefHeight(40.0);
-        button3.setPrefWidth(88.0);
+        button3.setPrefWidth(120.0);
         button3.setText("Score board");
         button3.setOnAction(new EventHandler < ActionEvent > (){
             @Override
@@ -173,13 +173,14 @@ public class MainWindow extends AnchorPane {
         button4.setLayoutY(170.0);
         button4.setMnemonicParsing(false);
         button4.setPrefHeight(40.0);
-        button4.setPrefWidth(88.0);
+        button4.setPrefWidth(120.0);
         button4.setText("Logout");
         button4.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
                 client.ps.println("logout"+","+client.myName); 
-                 System.out.println("loooogOut");
+                System.out.println("loooogOut");
+                client.resetClient();
                 Stage w = new Stage();
                 w.initModality(Modality.APPLICATION_MODAL);
                 w.setResizable(false);
@@ -191,11 +192,11 @@ public class MainWindow extends AnchorPane {
             }
         });
 
-        button5.setLayoutX(25.0);
-        button5.setLayoutY(240.0);
+        button5.setLayoutX(270.0);
+        button5.setLayoutY(400.0);
         button5.setMnemonicParsing(false);
         button5.setPrefHeight(40.0);
-        button5.setPrefWidth(88.0);
+        button5.setPrefWidth(140.0);
         button5.setText("Cancel Game");
         button5.setOnAction(new EventHandler < ActionEvent > () {
             @Override
@@ -210,7 +211,7 @@ public class MainWindow extends AnchorPane {
         button2.setId("button2");
         button3.setId("button3");
         button4.setId("button4");
-        button5.setId("button5");
+        button5.setId("button4");
 
         buttonBar.getButtons().add(button);
         buttonBar.getButtons().add(button0);
@@ -246,7 +247,6 @@ public class MainWindow extends AnchorPane {
         client.ps.println("scoreBoard"+","+username+","+"requested");
         System.out.println("LOADING Scoreboard");
         boolean answerFlag = false;
-
         while(!answerFlag){
             System.out.println("LOADING Scoreboard");
             if(client.OK == 1){

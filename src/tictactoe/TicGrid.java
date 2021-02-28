@@ -5,14 +5,11 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import static java.lang.Integer.parseInt;
-import java.security.Provider.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static tictactoe.logic.findBestMove;
@@ -20,7 +17,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseButton;
@@ -42,11 +38,12 @@ import tictactoe.MainWindow.GameType;
  * @author Mohamed Ali
  */
 public class TicGrid {
+
     GameType gameType;
-    static Thread replayThread = null, popUpthreadS=null, stateThread=null, checkStateThread=null;
-    static boolean outGame=true, STOPGAME=false;
+    static Thread replayThread = null, popUpthreadS = null, stateThread = null, checkStateThread = null;
+    static boolean outGame = true, STOPGAME = false;
     final public static Combo miniCombo = new Combo();
-    public final ClientThread client = ClientThread.getInstance();
+    public final static ClientThread client = ClientThread.getInstance();
     public static Tile[][] board = new Tile[3][3];
     public final static Pane root = new Pane();
 //    public Text text = new Text();
@@ -56,7 +53,7 @@ public class TicGrid {
     Scene winscene;
     Stage window;
     public DataInputStream dis;
-    int CLICKED=0;
+    int CLICKED = 0;
 
     Thread updatableThread = null;
     static char passboard[][] = new char[3][3];
@@ -64,22 +61,24 @@ public class TicGrid {
     public static boolean playable = true, turnX = true, firstround = true, returntox = false;
     public String winner, user = "X", computer = "O", xoro;
 
-    public static List < Combo > combos = new ArrayList < > ();
+    public static List< Combo> combos = new ArrayList<>();
     String message;
 
-    public static void drawThread(int x, int y){
-        board[x][y].drawX(); 
+    public static void drawThread(int x, int y) {
+        board[x][y].drawX();
     }
 
-    public static void drawThreadO(int x, int y){
+    public static void drawThreadO(int x, int y) {
         board[x][y].drawO();
     }
-    public void callCheck(){
+
+    public void callCheck() {
         checkState();
     }
     PrintWriter pW = null;
-    Pane createContent(GameType type, int level){
-        if(type != GameType.Replay){
+
+    Pane createContent(GameType type, int level) {
+        if (type != GameType.Replay) {
             try {
                 PrintWriter pW = new PrintWriter(FILENAME);
                 pW.print("");
@@ -117,35 +116,45 @@ public class TicGrid {
         combos.add(new Combo(board[0][0], board[1][1], board[2][2]));
         combos.add(new Combo(board[2][0], board[1][1], board[0][2]));
 
-
         root.addEventFilter(MouseEvent.MOUSE_PRESSED, (MouseEvent e) -> {
             System.out.println(e.getX() + "  " + e.getY());
 
-            if (e.getX() > 0 && e.getX() < 100)
+            if (e.getX() > 0 && e.getX() < 100) {
                 passX = 0;
-            else if (e.getX() > 100 && e.getX() < 200)
+            } else if (e.getX() > 100 && e.getX() < 200) {
                 passX = 1;
-            else if (e.getX() > 200 && e.getX() < 300)
+            } else if (e.getX() > 200 && e.getX() < 300) {
                 passX = 2;
-            if (e.getY() > 0 && e.getY() < 100)
+            }
+            if (e.getY() > 0 && e.getY() < 100) {
                 passY = 0;
-            else if (e.getY() > 100 && e.getY() < 200)
+            } else if (e.getY() > 100 && e.getY() < 200) {
                 passY = 1;
-            else if (e.getY() > 200 && e.getY() < 300)
+            } else if (e.getY() > 200 && e.getY() < 300) {
                 passY = 2;
+            }
             System.out.println(passX + "  " + passY);
         });
         return root;
     }
 
     public void checkState() {
-        for (Combo combo: combos) {
+        for (Combo combo : combos) {
             if (combo.isComplete()) {
-                STOPGAME=true;
+                STOPGAME = true;
                 playable = false;
-                client.PLAY=false;
+                client.PLAY = false;
                 winner = combo.tiles[0].getValue();
                 System.out.println("the winner player is : " + winner);
+                System.out.println(winner);
+                if (winner == "X" && gameType == GameType.Room) {
+                    client.ps.println("endGame" + client.myName + ",win");
+                    System.out.println("the winner player is : " + winner);
+                    client.iWon = "x";
+                } else if (winner == "X" && gameType == GameType.AI) {
+                    System.out.println("the winner player is : " + winner);
+                    client.iWon = "x";
+                }
                 playWinAnimation(combo);
             }
         }
@@ -163,48 +172,53 @@ public class TicGrid {
 
         Timeline timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(4000),
-            new KeyValue(line.endXProperty(), combo.tiles[2].getCenterX()),
-            new KeyValue(line.endYProperty(), combo.tiles[2].getCenterY())));
-            timeline.play();
+                new KeyValue(line.endXProperty(), combo.tiles[2].getCenterX()),
+                new KeyValue(line.endYProperty(), combo.tiles[2].getCenterY())));
+        timeline.play();
 //            if(popUpthreadS!=null){
 ////                popUpthreadS.stop();
 //                popUpthreadS = null;
 //            }
-            popUpthreadS = new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            while(outGame){
-                                try {
-                                    Thread.sleep(5000);
-                                    Platform.runLater(new Runnable(){
-                                        @Override
-                                        public void run() {
-                                            outGame=false;
-                                            if(!outGame)
-                                                Popup.display();
-                                        }
-                                    });
-                                    Thread.sleep(100);
-                                }catch (InterruptedException e){}
+        popUpthreadS = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (outGame) {
+                    try {
+                        Thread.sleep(5000);
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                outGame = false;
+                                if (!outGame) {
+                                    Popup.display();
+                                }
                             }
-                        }
+                        });
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
                     }
-                );
-            popUpthreadS.start();
+                }
+            }
+        }
+        );
+        popUpthreadS.start();
     }
 
     public static class Combo {
+
         public Tile[] tiles;
-        public Combo(Tile...tiles) {
+
+        public Combo(Tile... tiles) {
             this.tiles = tiles;
         }
 
         public boolean isComplete() {
-            if (tiles[0].getValue().isEmpty())
+            if (tiles[0].getValue().isEmpty()) {
                 return false;
+            }
 
-            return tiles[0].getValue().equals(tiles[1].getValue()) &&
-                tiles[0].getValue().equals(tiles[2].getValue());
+            return tiles[0].getValue().equals(tiles[1].getValue())
+                    && tiles[0].getValue().equals(tiles[2].getValue());
         }
 
         public void AI(Combo combo) {
@@ -229,52 +243,60 @@ public class TicGrid {
         try {
             FileInputStream fis = new FileInputStream(FILENAME);
             Scanner sc = new Scanner(fis);
-            replayThread = new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            while (true) {
-                                try {
-                                    if (!sc.hasNext())
-                                        break;
-                                    String li = sc.nextLine();
-                                    String[] strarray = li.split(":");
-                                    System.out.println(strarray[2]);
-                                    posX = parseInt(strarray[0]);
-                                    posY = parseInt(strarray[1]);
-                                    xoro = strarray[2];
-                                    Thread.sleep(2000);
-                                    Platform.runLater(new Runnable(){
-                                        @Override
-                                        public void run() {
-                                            if(new String (xoro).equals("x")){
-                                                board[posX][posY].drawX();
-//                                                System.out.println("ddddddd");
-                                            }
-                                            else if (new String (xoro).equals("o"))
-                                                board[posX][posY].drawO();
-                                        }
-                                    });
-                                    Thread.sleep(500);
-                                }catch (InterruptedException e){}
+            replayThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            if (!sc.hasNext()) {
+                                break;
                             }
+                            String li = sc.nextLine();
+                            String[] strarray = li.split(":");
+                            System.out.println(strarray[2]);
+                            posX = parseInt(strarray[0]);
+                            posY = parseInt(strarray[1]);
+                            xoro = strarray[2];
+                            Thread.sleep(2000);
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (new String(xoro).equals("x")) {
+                                        board[posX][posY].drawX();
+//                                                System.out.println("ddddddd");
+                                    } else if (new String(xoro).equals("o")) {
+                                        try {
+                                            board[posX][posY].drawO();
+                                        } catch (ArrayIndexOutOfBoundsException e) {
+                                            client.iWon = "draw";
+                                        }
+                                    }
+                                }
+                            });
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
                         }
                     }
+                }
+            }
             );
             replayThread.start();
-       } catch (FileNotFoundException ex) {}
+        } catch (FileNotFoundException ex) {
+        }
 
     }
 
-
     public class Tile extends StackPane {
+
         Text text = new Text();
+
         //Combo complay = new Combo();
         public Tile() {
             Rectangle border = new Rectangle(100, 100);
             border.setFill(null);
 
 //            border.setFill(new ImagePattern(img));
-            border.setArcWidth(70.0); 
+            border.setArcWidth(70.0);
             border.setArcHeight(50.0);
 
             border.setStroke(Color.BLACK);
@@ -283,94 +305,79 @@ public class TicGrid {
             setAlignment(Pos.CENTER);
             setOnMouseClicked(event -> {
 //                System.out.println(gameType);
-                if(gameType == GameType.Replay){
-                    if(playable)
+                if (gameType == GameType.Replay) {
+                    if (playable) {
                         replayGame();
-                    playable=false;
-                }
-                else
+                    }
+                    playable = false;
+                } else {
                     handlePlaying(gameType, event);
+                }
             });
         }
-        public void AITurn(int level){
-            if (!playable)
-                return;
-            switch (level) {
-                case 1:
-                    {
-                        for (int j = 0; j < 3; j++) {
-                            for (int i = 0; i < 3; i++) {
-                                if (board[j][i].getValue().isEmpty()) {
-                                    board[j][i].drawO();
-//                                    FileOutputStream fos;
-//                                    try {
-//                                        fos = new FileOutputStream(FILENAME, true);
-//                                        PrintWriter pw = new PrintWriter(fos);
-//                                        System.out.println(j + ":" + i + ":x");
-//                                        pw.println(j + ":" + i + ":o");
-//                                        pw.close();
-//                                    } catch (FileNotFoundException ex) {
-//                                        Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
-//                                    }
-                                    turnX = true;
-                                    checkState();
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case 2:{
-                        if (firstround){
-                            if (board[0][0].getValue().isEmpty()) {
-                                board[0][0].drawO();
-                                firstround = false;
-                            } else {
-                                board[1][1].drawO();
-                                firstround = false;
-                            }
-                        } else {
-                            System.out.println("hello");
-                            for (Combo combo: combos) {
-                                combo.AI(combo);
-                                if (returntox) {
-                                    turnX = true;
-                                    checkState();
-                                    returntox = false;
-                                    break;
-                                }
-                            }
-                        }
-                        turnX = true;
-                        checkState();
-                    }
-                    break;
-                case 3:
-                    {
-                        logic.Move bestMove = findBestMove(passboard);
-                        passboard[bestMove.row][bestMove.col] = 'o';
-                        board[bestMove.row][bestMove.col].drawO();
-//                        FileOutputStream fos;
-//                        try {
-//                            fos = new FileOutputStream(FILENAME, true);
-//                            PrintWriter pw = new PrintWriter(fos);
-//                            pw.println(bestMove.row + ":" + bestMove.col + ":o");
-//                            System.out.println(bestMove.row + ":" + bestMove.col + ":x");
-//                            pw.close();
-//                        } catch (FileNotFoundException ex) {
-//                            Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-                        checkState();
-                        turnX = true;
 
+        public void AITurn(int level) {
+            if (!playable) {
+                return;
+            }
+            switch (level) {
+                case 1: {
+                    for (int j = 0; j < 3; j++) {
                         for (int i = 0; i < 3; i++) {
-                            for (int j = 0; j < 3; j++) {
-                                System.out.print(passboard[j][i] + " ");
+                            if (board[j][i].getValue().isEmpty()) {
+                                board[j][i].drawO();
+                                FileOutputStream fos;
+                                try {
+                                    fos = new FileOutputStream(FILENAME, true);
+                                    PrintWriter pw = new PrintWriter(fos);
+                                    //System.out.println("level 11111111");	
+                                    pw.println(j + ":" + i + ":o");
+                                    pw.close();
+                                } catch (FileNotFoundException ex) {
+                                    Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                turnX = true;
+                                checkState();
+                                return;
                             }
-                            System.out.println(" ");
                         }
                     }
-                    break;
+                }
+                break;
+                case 2: {
+                    logic.Move bestMove = findBestMove(passboard);
+                    try {
+                        passboard[bestMove.row][bestMove.col] = 'o';
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                    }
+
+                    try {
+                        board[bestMove.row][bestMove.col].drawO();
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                    }
+
+                    FileOutputStream fos;
+                    try {
+                        fos = new FileOutputStream(FILENAME, true);
+                        PrintWriter pw = new PrintWriter(fos);
+                        pw.println(bestMove.row + ":" + bestMove.col + ":o");
+                        System.out.println(bestMove.row + ":" + bestMove.col + ":x");
+                        pw.close();
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    checkState();
+                    turnX = true;
+
+                    for (int i = 0; i < 3; i++) {
+                        for (int j = 0; j < 3; j++) {
+                            System.out.print(passboard[j][i] + " ");
+
+                        }
+                        System.out.println(" ");
+                    }
+                }
+                break;
                 default:
                     break;
             }
@@ -398,16 +405,17 @@ public class TicGrid {
 //            checkState();
         }
 
-        public void handlePlaying(GameType gameType, MouseEvent event){
-            if (gameType != GameType.None){
+        public void handlePlaying(GameType gameType, MouseEvent event) {
+            if (gameType != GameType.None) {
                 System.out.println(gameType);
-                if (!playable)
+                if (!playable) {
                     return;
-                switch(gameType){
+                }
+                switch (gameType) {
                     case Replay:
                         if (event.getButton() == MouseButton.PRIMARY) {
-                            playable=false;
-                            gameType=GameType.None;
+                            playable = false;
+                            gameType = GameType.None;
                             replayGame();
                         }
                     case AI:
@@ -424,7 +432,7 @@ public class TicGrid {
 //                            }
                             leftClickHandler();
                         }
-                        if (level !=-1 && !turnX){
+                        if (level != -1 && !turnX) {
                             System.out.println("AI Turn");
                             AITurn(level);
                         }
@@ -432,9 +440,19 @@ public class TicGrid {
                     case Local:
                         if (event.getButton() == MouseButton.PRIMARY) {
                             leftClickHandler();
-                        }
-                        else if (event.getButton() == MouseButton.SECONDARY){
-                            if (turnX) return;
+                        } else if (event.getButton() == MouseButton.SECONDARY) {
+                            if (turnX) {
+                                return;
+                            }
+                            try {
+                                FileOutputStream fos = new FileOutputStream(FILENAME, true);
+                                PrintWriter pw = new PrintWriter(fos);
+                                //System.out.println(posX + ":" + posY + ":x");
+                                pw.println(posX + ":" + posY + ":o");
+                                pw.close();
+                            } catch (FileNotFoundException ex) {
+                                Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                             drawO();
                             turnX = true;
                             checkState();
@@ -443,43 +461,51 @@ public class TicGrid {
                     case Room:
                         if (event.getButton() == MouseButton.PRIMARY) {
 //                            CLICKED+=1;
-                            if(checkStateThread == null){
-                                checkStateThread = new Thread(new Runnable(){
-                                            @Override
-                                            public void run(){
-                                                while(!STOPGAME){
-                                                    try {
-                                                        Thread.sleep(1000);
-                                                        System.out.println("Checking the game state thread...");
-                                                        Platform.runLater(new Runnable(){
-                                                            @Override
-                                                            public void run(){
-                                                                checkState();
-                                                            }
-                                                        });
-                                                        Thread.sleep(500);
-                                                    }catch (InterruptedException e){}
-                                                }
-                                            }
-                                        }
-                                    );
-                                checkStateThread.start();
-                            }
+//                            if (checkStateThread == null) {
+//                                checkStateThread = new Thread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        while (!STOPGAME) {
+//                                            try {
+//                                                Thread.sleep(1000);
+//                                                System.out.println("Checking the game state thread...");
+//                                                Platform.runLater(new Runnable() {
+//                                                    @Override
+//                                                    public void run() {
+//                                                        checkState();
+//                                                    }
+//                                                });
+//                                                Thread.sleep(500);
+//                                            } catch (InterruptedException e) {
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                                );
+//                                checkStateThread.start();
+//                            }
+                            checkState();
+                            System.out.println("After check");
                             leftClickHandler();
+                            System.out.println("After click");
                             String msg = playNetwork(client.myName, client.opponent, passX, passY);
-                            if(!msg.isEmpty()){
-                                if(msg.length() != 6)
+                            System.out.println("KOLO HERE" + msg);
+                            if (!msg.isEmpty()) {
+                                System.out.println("KOLO HERE1 not empty" + msg);
+                                if (msg.length() != 6) {
+                                    System.out.println("KOLO HERE1 not empty" + msg);
                                     break;
+                                }
 //                                play,moi,hossam,0,0,non
                                 int x = parseInt(msg.split(",")[3]);
                                 int y = parseInt(msg.split(",")[4]);
                                 String turn = msg.split(",")[5];
-                                System.out.println("KOLO HERE"+turn);
-                                if(turn.equals("non")){
-                                    System.out.println("KOLO HERE2"+turn);
+                                System.out.println("KOLO HERE" + turn);
+                                if (turn.equals("non")) {
+                                    System.out.println("KOLO HERE2" + turn);
                                     board[x][y].drawO();
-                                    turnX=true;
-                                    playable=false;
+                                    turnX = true;
+                                    playable = false;
 //                                    checkState();
                                 }
                             }
@@ -501,7 +527,7 @@ public class TicGrid {
 //                                    );}
 ////                                    }
 //                                }).start();
-                            }
+                        }
 //                            CLICKED=1;
 //                            if(checkState()) break;
 //                            Platform.runLater(() -> rightClickHandler());
@@ -523,14 +549,14 @@ public class TicGrid {
 ////                                    playable=false;
 //                                checkState();
 //                                }
-    //                                else{
-    //                                    board[x][y].drawO();
-    //                                    turnX=true;
-    //                                    playable=false;
-    //                                    checkState();
-    //                                }
-    //                                if(client.IMY) board[x][y].drawX();
-    //                                else board[x][y].drawO();
+                        //                                else{
+                        //                                    board[x][y].drawO();
+                        //                                    turnX=true;
+                        //                                    playable=false;
+                        //                                    checkState();
+                        //                                }
+                        //                                if(client.IMY) board[x][y].drawX();
+                        //                                else board[x][y].drawO();
 //                            }
 //                        }
 //                        checkState();
@@ -538,66 +564,93 @@ public class TicGrid {
 //                                break;
                         break;
                     default:
-                    break;
+                        break;
                 }
             }
         }
-        public void leftClickHandler(){
-            if (!turnX) return;
-            else{
-                passboard[passX][passY] = 'x';
-                if(gameType == GameType.Room){
-                    runDrawThread();
+
+        public void leftClickHandler() {
+            if (!turnX) {
+                drawO();
+                FileOutputStream fos;
+                try {
+                    fos = new FileOutputStream(FILENAME, true);
+                    PrintWriter pw = new PrintWriter(fos);
+                    System.out.println(passX + ":" + passY + ":x");
+                    pw.println(passX + ":" + passY + ":o");
+                    pw.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                else{
-                    
+
+                turnX = !turnX;
+                checkState();
+            } else {
+                passboard[passX][passY] = 'x';
+                if (gameType == GameType.Room) {
+                    runDrawThread();
+                } else {
+
                     drawX();
-                    turnX = false;
+                    FileOutputStream fos;
+                    try {
+                        fos = new FileOutputStream(FILENAME, true);
+                        PrintWriter pw = new PrintWriter(fos);
+                        System.out.println(passX + ":" + passY + ":x");
+                        pw.println(passX + ":" + passY + ":x");
+                        pw.close();
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    turnX = !turnX;
                 }
                 checkState();
             }
         }
-        public void runDrawThread(){
-            Thread drawThread = new Thread(new Runnable(){
-                        @Override
-                        public void run(){
-                            try {
+
+        public void runDrawThread() {
+            Thread drawThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
 //                                        Thread.sleep(1000);
-                                Platform.runLater(new Runnable(){
-                                    @Override
-                                    public void run(){
-                                        drawX();
-                                        turnX = false;
-                                    }
-                                });
-                                Thread.sleep(500);
-                            }catch (InterruptedException e){}
-                        }
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                drawX();
+                                turnX = false;
+                            }
+                        });
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
                     }
-                );
+                }
+            }
+            );
             drawThread.start();
         }
     }
-    public void resetBoard(){
-        if(replayThread!=null){
+
+    public void resetBoard() {
+        if (replayThread != null) {
             replayThread.stop();
-            replayThread=null;
+            replayThread = null;
         }
-        if(stateThread!=null){
+        if (stateThread != null) {
             stateThread.stop();
-            stateThread=null;
+            stateThread = null;
         }
-        if(stateThread!=null){
+        if (stateThread != null) {
             stateThread.stop();
-            stateThread=null;
+            stateThread = null;
         }
-        outGame=true;
+        outGame = true;
         user = "X";
         computer = "O";
-        level=-1;
+        level = -1;
         playable = true;
         turnX = true;
-        winner="";
+        winner = "";
         board = new Tile[3][3];
         TicGrid.passboard = new char[3][3];
         passX = -1;
@@ -607,38 +660,38 @@ public class TicGrid {
 //        AIEnabled=false;
 //        roomEnabled = false;
 //        optionBtnClicked=false;
-        xoro="";
-        combos = new ArrayList < > ();
+        xoro = "";
+        combos = new ArrayList<>();
         firstround = true;
         returntox = false;
     }
 
     //play,hossam,chris,0,0
-    public String playNetwork(String myName, String opponent, int posX, int posY){
-        client.ps.println("play,"+myName+","+opponent+","+posX+","+posY);
+    public String playNetwork(String myName, String opponent, int posX, int posY) {
+        client.ps.println("play," + myName + "," + opponent + "," + posX + "," + posY);
         boolean answerFlag = false;
-        while(!answerFlag){
+        while (!answerFlag) {
             System.out.println("HAAAAI");
-            if(client.OK == 1){
+            if (client.OK == 1) {
                 System.out.println("OK");
-                answerFlag=true;
+                answerFlag = true;
             }
-            if(client.OK == 0){
+            if (client.OK == 0) {
                 System.out.println("NOT OK :(");
-                answerFlag=true;
+                answerFlag = true;
                 client.OK = 2;
             }
         }
-        if(client.OK == 1){
+        if (client.OK == 1) {
             String response = client.getMessage();
             client.OK = 2;
-            answerFlag=false;
-            System.out.println("SERVER RESPONSE"+response);
+            answerFlag = false;
+            System.out.println("SERVER RESPONSE" + response);
             return response;
         }
         return "";
     }
-    
+
 }
 
 /*
@@ -664,4 +717,4 @@ public void threadHandling(String myName, String opponent, int posX, int posY){
       }
     });
     }
-*/
+ */

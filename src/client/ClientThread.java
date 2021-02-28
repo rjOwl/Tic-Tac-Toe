@@ -14,6 +14,7 @@ public class ClientThread extends Thread {
     public Stage currentWindow;
     public int OK=2;
     public boolean IMY=false;
+    public String iWon = "";
     public int guiThreadCreated=1;
     public boolean PLAY=true;
     private static ClientThread client = null;
@@ -127,8 +128,8 @@ public class ClientThread extends Thread {
         if(message.split(",")[0].equals("play")){
             if(message.split(",")[1].equals(myName)){
                 System.out.println("FOR ME: "+message);
-                OK=1;
                 opponent = new String(message. split(",")[2]);
+                OK=1;
                 return true;
             }
         }
