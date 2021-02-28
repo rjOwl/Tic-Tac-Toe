@@ -434,6 +434,58 @@ public class Database {
         } 
         
     }
+    void saveVectorIndex(String gameId, String vectorIndex)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryStringInsert = new 
+                String("insert into gameIdVectorIndex values ("+gameId+","+vectorIndex+")");
+            stm.execute(queryStringInsert);
+        }
+        catch(SQLException ex)
+        {
+            ex.printStackTrace();
+            
+        }       
+    }
+    String getVectorIndex (String gameId)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryString = new String("select vIndex from gameIdVectorIndex where gId= "+gameId+"");
+            ResultSet rs = stm.executeQuery(queryString);
+            rs.next(); 
+            String vectorIndex = rs.getString(1);
+            return vectorIndex;
+        }
+        catch(SQLException ex)
+        {
+            //ex.printStackTrace();
+            System.out.println("No user loged in or registered");
+            return "nan";
+        } 
+    }
+    String getRoomIdByPlayer(String player)
+    {
+        try
+        {
+            stm = con.createStatement();
+            String queryString = new String("select gameId from players where username= '"+player+"'");
+            ResultSet rs = stm.executeQuery(queryString);
+            rs.next(); 
+            String vectorIndex = rs.getString(1);
+            return vectorIndex;
+        }
+        catch(SQLException ex)
+        {
+            //ex.printStackTrace();
+            System.out.println("No user loged in or registered");
+            return "nan";
+        } 
+        
+    }
     void closeConnection()
     {
         try
