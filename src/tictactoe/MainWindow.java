@@ -2,6 +2,7 @@ package tictactoe;
 
 import client.ClientThread;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -20,7 +21,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class MainWindow extends AnchorPane {
-    enum GameType { AI, Local,Room, None}
+    enum GameType { AI, Local,Room,Replay, None}
     protected final ButtonBar buttonBar;
     protected final Button button;
     protected final Button button0;
@@ -32,6 +33,7 @@ public class MainWindow extends AnchorPane {
     protected final Button button2;
     protected final Button button3;
     protected final Button button4;
+    protected final Button button5;
     protected final TicGrid grid = new TicGrid();
     protected ComboBox comboBox = new ComboBox();
     int level;
@@ -54,6 +56,7 @@ public class MainWindow extends AnchorPane {
         button2 = new Button();
         button3 = new Button();
         button4 = new Button();
+        button5 = new Button();
         levelLabel = new Label();
 
         setMaxHeight(USE_PREF_SIZE);
@@ -75,18 +78,19 @@ public class MainWindow extends AnchorPane {
             public void handle(ActionEvent event) {
                 handleOptions(showLevels=true);
 //                grid.createContent(GameType.AI, level=-1, 1);
+                gridPane = grid.createContent(GameType.AI, level=-1);
                 client.guiThreadCreated=1;
             }
         });
 
         button0.setMnemonicParsing(false);
-        button0.setText("Play Local");
+        button0.setText("Local");
         button0.setOnAction(new EventHandler < ActionEvent > (){
             @Override
             public void handle(ActionEvent event) {
                 handleOptions(showLevels=false);
                 levelLabel.setText("");
-//                gridPane = grid.createContent(GameType.Local, level=-1);
+                gridPane = grid.createContent(GameType.Local, level=-1);
                 client.guiThreadCreated=1;
             }
         });
@@ -120,7 +124,7 @@ public class MainWindow extends AnchorPane {
             level += 1;
             handleOptions(showLevels=true);
             //            FIX THIS LOGIC 
-//            gridPane = grid.createContent(GameType.AI, level);
+            gridPane = grid.createContent(GameType.AI, level);
             client.guiThreadCreated=1;
         });
         gridPane.setLayoutX(168.0);
@@ -138,7 +142,10 @@ public class MainWindow extends AnchorPane {
         button2.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
-                grid.replayGame();
+                handleOptions(showLevels=false);
+                levelLabel.setText("");
+                gridPane = grid.createContent(GameType.Replay, level=-1);
+                client.guiThreadCreated=1;
             }
         });
 
@@ -148,15 +155,18 @@ public class MainWindow extends AnchorPane {
         button3.setPrefHeight(40.0);
         button3.setPrefWidth(88.0);
         button3.setText("Score board");
-        button3.setOnAction(new EventHandler < ActionEvent > () {
+        button3.setOnAction(new EventHandler < ActionEvent > (){
             @Override
-            public void handle(ActionEvent event) {
-                try {
-                    showScoreBoard("hossam");
-                } catch (IOException ex) {
-                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+            public void handle(ActionEvent event){
+            String msg = getScore(client.myName);
+            Stage w =new Stage();
+            w.initModality(Modality.APPLICATION_MODAL);
+            w.setResizable(false);
+            //                w.initStyle(StageStyle.UNDECORATED);
+            Scene s = new Scene(new ScoreBoard(msg));
+            w.setScene(s);
+            w.showAndWait();
+           }
         });
 
         button4.setLayoutX(25.0);
@@ -168,8 +178,30 @@ public class MainWindow extends AnchorPane {
         button4.setOnAction(new EventHandler < ActionEvent > () {
             @Override
             public void handle(ActionEvent event) {
-                mainWindow.setScene(new Scene(new LoginScreen(mainWindow)));
+                client.ps.println("logout"+","+client.myName); 
+                 System.out.println("loooogOut");
+                Stage w = new Stage();
+                w.initModality(Modality.APPLICATION_MODAL);
+                w.setResizable(false);
+                Scene s = new Scene(new LoginScreen(w));
+                s.getStylesheets().add(getClass().getResource("loginStyle.css").toString());
+                w.setScene(s);
+                w.show();
+                mainWindow.close();
             }
+        });
+
+        button5.setLayoutX(25.0);
+        button5.setLayoutY(240.0);
+        button5.setMnemonicParsing(false);
+        button5.setPrefHeight(40.0);
+        button5.setPrefWidth(88.0);
+        button5.setText("Cancel Game");
+        button5.setOnAction(new EventHandler < ActionEvent > () {
+            @Override
+            public void handle(ActionEvent event) {
+                client.ps.println("cancelGame"+","+client.myName);
+                System.out.println("ccaaanccclllleee");}
         });
 
         button.setId("button");
@@ -178,6 +210,7 @@ public class MainWindow extends AnchorPane {
         button2.setId("button2");
         button3.setId("button3");
         button4.setId("button4");
+        button5.setId("button5");
 
         buttonBar.getButtons().add(button);
         buttonBar.getButtons().add(button0);
@@ -188,13 +221,15 @@ public class MainWindow extends AnchorPane {
         getChildren().add(button2);
         getChildren().add(button3);
         getChildren().add(button4);
+        getChildren().add(button5);
     }
-  private void handleOptions(boolean showLevels){
+
+    private void handleOptions(boolean showLevels){
         this.comboBox.setVisible(showLevels);
         this.gridPane.getChildren().clear();
     }
-  
-    private void popUpDialog(){
+
+  private void popUpDialog(){
         gridPane = grid.createContent(GameType.Room, level=-1);
 
         Stage w = new Stage();
@@ -207,12 +242,13 @@ public class MainWindow extends AnchorPane {
         client.guiThreadCreated=0;
     }
 
-    private void showScoreBoard(String username) throws IOException{
-        Stage w = new Stage();
+    private String getScore(String username){
         client.ps.println("scoreBoard"+","+username+","+"requested");
-
+        System.out.println("LOADING Scoreboard");
         boolean answerFlag = false;
+
         while(!answerFlag){
+            System.out.println("LOADING Scoreboard");
             if(client.OK == 1){
                 answerFlag=true;
             }
@@ -221,17 +257,55 @@ public class MainWindow extends AnchorPane {
                 client.OK = 2;
             }
         }
-        if(1 == 1 && client.OK == 1){
+        if(client.OK == 1){
             client.OK = 2;
-            String rows = client.getRows();
+            String rows = client.message;
+            return rows;
+        }
+        return "";
+    }
+
+    private void showScoreBoard(String username){
+        Stage w = new Stage();
+        client.ps.println("scoreBoard"+","+username+","+"requested");
+        System.out.println("LOADING Scoreboard");
+        boolean answerFlag = false;
+        while(!answerFlag){
+            System.out.println("LOADING Scoreboard");
+            if(client.OK == 1){
+                answerFlag=true;
+            }
+            if(client.OK == 0){
+                answerFlag=true;
+                client.OK = 2;
+            }
+        }
+        if(client.OK == 1){
+            client.OK = 2;
+            String rows = client.message;
+            System.out.println(rows);
+
             String row[] = rows.split(",");
             int n = Integer.parseInt(rows.split(",")[2]);
-            n = n * 4;
-            for(int i = 3; i < n+3; i++){
-                System.out.println(row[i]);
-            }
-            answerFlag=false;
+//            r = new String[n+1][4];
+            int j = 3;
+
+//            n = n * 4;
+//            for (int i=0; i < n; i+=3){
+//                r[i]
+//                sRows.add(new String[]{row[i], row[i+1], row[i+2]});
+//            }
+//            for(int i = 3; i < n+3; i++){
+//                System.out.println(row[i]);
+//            }
         }
+            answerFlag=false;
+            w.initModality(Modality.APPLICATION_MODAL);
+            w.setResizable(false);
+            //                w.initStyle(StageStyle.UNDECORATED);
+//            Scene s = new Scene(new ScoreBoard());
+//            w.setScene(s);
+            w.showAndWait();
     }
 }
-    
+

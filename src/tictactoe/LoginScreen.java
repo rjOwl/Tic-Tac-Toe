@@ -85,7 +85,7 @@ public class LoginScreen extends AnchorPane {
                 Scene s = new Scene(main);
                 s.getStylesheets().add(getClass().getResource("MyStyle.css").toString());
                 currentWindow.setScene(s);
-//                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
+                currentWindow.setScene(new Scene(new MainWindow(currentWindow)));
             }
         });
 

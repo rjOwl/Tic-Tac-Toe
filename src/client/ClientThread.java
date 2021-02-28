@@ -15,6 +15,7 @@ public class ClientThread extends Thread {
     public int OK=2;
     public boolean IMY=false;
     public int guiThreadCreated=1;
+    public boolean PLAY=true;
     private static ClientThread client = null;
     TicGrid obj;
     public void setData(String name) {
@@ -36,6 +37,7 @@ public class ClientThread extends Thread {
         try{
             System.out.println("Calling the client thread constructor");
             mySocket = new Socket("hossamradwan.hopto.org", 5005);
+//            mySocket = new Socket("41.237.192.233", 5005);
             dis = new DataInputStream(mySocket.getInputStream());
             ps = new PrintStream(mySocket.getOutputStream());
             start();
@@ -79,6 +81,8 @@ public class ClientThread extends Thread {
             }
         }
     }
+
+
     private boolean signing(String message){
         if( message.split(",")[0].equals("login")
             || message.split(",")[0].equals("register")){
@@ -94,9 +98,12 @@ public class ClientThread extends Thread {
     }
     private boolean scoreBoard(String message){
         if(message. split(",")[0].equals("scoreBoard")){
-            if(new String(message.split(",")[2]).equals("true")){
+            System.out.println("In method Scoreboard");
+            int rows = parseInt(message.split(",")[2]);
+            if(rows > 0){
+                System.out.println(message);
                 OK = 1;
-                return true;                
+                return true;
             }
         }
         else OK=0;
@@ -106,7 +113,7 @@ public class ClientThread extends Thread {
     private boolean readyGame(String message){
         if(new String(message. split(",")[0]).equals("readyGame")){
             if(new String(message. split(",")[2]).equals("true")){
-                System.out.println(message);               
+                System.out.println(message);
                 OK=1;
                 IMY=true;
             }
@@ -118,7 +125,18 @@ public class ClientThread extends Thread {
 
     private boolean play(String message){
         if(message.split(",")[0].equals("play")){
-//                System.out.println("PLAY: "+message);               
+            if(message.split(",")[1].equals(myName)){
+                System.out.println("FOR ME: "+message);
+                OK=1;
+                opponent = new String(message. split(",")[2]);
+                return true;
+            }
+        }
+        return false;
+    }
+    private boolean playFromServer(String message){
+        if(message.split(",")[0].equals("play")){
+//                System.out.println("PLAY: "+message);
             if(message.split(",")[1].equals(myName)){
                 System.out.println("FOR ME: "+message);
                 if(message.split(",").length == 6){
@@ -153,6 +171,30 @@ public class ClientThread extends Thread {
         }
         return false;
     }
-}
+    
+    public boolean endGame(){
+        if(message.split(",")[0].equals("endGame")){
+            
+        }
+        return false;
+    }
 
+    public String[][] getRecords(){
+        String splitted[] = message.split(",");
+        int rows = parseInt(splitted[2])+1;
+
+        String [][] data = new String[rows][4];
+        data[0][0] = "Username";
+        data[0][1] = "win";
+        data[0][2] = "lose";
+        data[0][3] = "draw";
+        int n = 3;
+        for(int i=1; i<rows; i++){
+            for(int j=0; j<4; j++){
+                data[i][j] = splitted[n++];
+            }
+        }
+        return data;
+    }
+}
 
