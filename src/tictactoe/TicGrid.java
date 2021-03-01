@@ -177,33 +177,27 @@ public class TicGrid {
                 new KeyValue(line.endXProperty(), combo.tiles[2].getCenterX()),
                 new KeyValue(line.endYProperty(), combo.tiles[2].getCenterY())));
         timeline.play();
-//            if(popUpthreadS!=null){
-////                popUpthreadS.stop();
-//                popUpthreadS = null;
-//            }
-        popUpthreadS = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (outGame) {
+        if(popUpthreadS==null){
+            popUpthreadS = new Thread(new Runnable() {
+                @Override
+                public void run() {
                     try {
                         Thread.sleep(5000);
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
-                                outGame = false;
-                                if (!outGame) {
-                                    Popup.display();
-                                }
+                                Popup.display();
+                                popUpthreadS.stop();
                             }
                         });
                         Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                    }
+                    } catch (InterruptedException e) {}
                 }
             }
+            );
+            popUpthreadS.start();
+            
         }
-        );
-        popUpthreadS.start();
     }
 
     public static class Combo {
@@ -409,6 +403,7 @@ public class TicGrid {
                 if (!playable) {
                     return;
                 }
+                // MOSTAFA
                 switch (gameType) {
                     case Replay:
                         if (event.getButton() == MouseButton.PRIMARY) {
@@ -418,7 +413,7 @@ public class TicGrid {
                         }
                     case AI:
                         if (event.getButton() == MouseButton.PRIMARY) {
-                            leftClickHandler();
+                            gameAIHandler();
                         }
                         if (level != -1 && !turnX) {
                             System.out.println("AI Turn");
@@ -476,8 +471,9 @@ public class TicGrid {
             }
         }
 
-        public void leftClickHandler() {
-            if (!turnX && gameType != GameType.Room) {
+        // Handle AI game
+        public void gameAIHandler() {
+            if (!turnX) {
                 drawO();
                 FileOutputStream fos;
                 try {
@@ -490,42 +486,37 @@ public class TicGrid {
                     Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 turnX = !turnX;
-//                checkState();
+                checkState();
             } else {
                 passboard[passX][passY] = 'x';
-                if (gameType == GameType.Room) {
-                    runDrawThread();
-                } else {
-                    drawX();
-                    FileOutputStream fos;
-                    try {
-                        fos = new FileOutputStream(FILENAME, true);
-                        PrintWriter pw = new PrintWriter(fos);
-                        System.out.println(passX + ":" + passY + ":x");
-                        pw.println(passX + ":" + passY + ":x");
-                        pw.close();
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    turnX = !turnX;
+                drawX();
+                FileOutputStream fos;
+                try {
+                    fos = new FileOutputStream(FILENAME, true);
+                    PrintWriter pw = new PrintWriter(fos);
+                    System.out.println(passX + ":" + passY + ":x");
+                    pw.println(passX + ":" + passY + ":x");
+                    pw.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(TicGrid.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                turnX = !turnX;
                 checkState();
             }
         }
 
+        // DRAW THREAD
         public void runDrawThread() {
             Thread drawThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
+                        turnX = false;
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
-                                System.out.println("Drawing my move");
-                                if (turnX) {
+                                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX");
                                     drawX();
-                                    turnX = false;
-                                }
                             }
                         });
                         Thread.sleep(50);
@@ -538,30 +529,123 @@ public class TicGrid {
         }
     }
 
+    public void handleIncomingRequests(boolean startMe) {
+        if (handleIncomingRequestsThread == null) {
+            System.out.println("STARTING THE HANDLE INCOMING THREAD REQUESTS");
+            //wait and draw from server
+            // first thing when initatiated 
+            // if I clicked mouse 
+            //      then> drawX()
+            // then> listen to serever()
+            //       when server responds
+            //          > drawO()
+            handleIncomingRequestsThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            threadMsgFromServer = client.message;
+                            threadMsgArrFromServer = threadMsgFromServer.split(",");
+                            Thread.sleep(500);
+                            System.out.println("Listeneing for incomming moves...");
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (threadMsgArrFromServer.length == 6) {
+                                        System.out.println("Message is == 6:>>> " + threadMsgFromServer);
+//                                        if (threadMsgFromServer.split(",")[5].equals(client.myName)) {
+                                        System.out.println("Message2 is == 6>>> " + threadMsgFromServer);
+                                        int x = parseInt(threadMsgFromServer.split(",")[3]);
+                                        int y = parseInt(threadMsgFromServer.split(",")[4]);
+                                        String turn = new String(threadMsgFromServer.split(",")[5]);
+                                        try {
+                                            if (turn.equals("non")) {
+                                                System.out.println("Message3 is == 6>>> " + threadMsgFromServer);
+                                                System.out.println("ENEMEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+                                                if(!turnX){
+                                                    board[x][y].drawO();
+                                                    turnX=true;                                                
+                                                }
+                                                checkState();
+                                            }
+                                        } catch (ArrayIndexOutOfBoundsException e) {
+                                            System.out.println("That's a draw");
+                                            client.iWon = "draw";
+                                        }
+//                                        }
+                                    }
+                                    turnX = true;
+                                }
+                            });
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                }
+            }
+            );
+            handleIncomingRequestsThread.start();
+        }
+    }
+
+    //play,hossam,chris,0,0
+    public String playNetwork(String myName, String opponent, int posX, int posY) {
+        client.ps.println("play," + myName + "," + opponent + "," + posX + "," + posY);
+        boolean answerFlag = false;
+        while (!answerFlag) {
+            System.out.println("HAAAAI");
+            if (client.OK == 1) {
+                System.out.println("OK");
+                answerFlag = true;
+            }
+            if (client.OK == 0) {
+                System.out.println("NOT OK :(");
+                answerFlag = true;
+                client.OK = 2;
+            }
+        }
+        if (client.OK == 1) {
+            String response = client.getMessage();
+            client.OK = 2;
+            answerFlag = false;
+            System.out.println("SERVER RESPONSE" + response);
+            return response;
+        }
+        return "";
+    }
+
     public void resetBoard() {
-    threadMsgFromServer = "";
-    String[] threadMsgArrFromServer;
-    replayThread = null; popUpthreadS = null; stateThread = null; checkStateThread = null;
-    handleIncomingRequestsThread = null;
-    handleOutgoingRequestsThread = null;
-    outGame = true; STOPGAME = false;
-    Combo miniCombo = new Combo();
-    Tile[][] board = new Tile[3][3];
-    Pane root = new Pane();
+        threadMsgFromServer = "";
+        String[] threadMsgArrFromServer;
+        replayThread = null;
+        popUpthreadS = null;
+        stateThread = null;
+        checkStateThread = null;
+        handleIncomingRequestsThread = null;
+        handleOutgoingRequestsThread = null;
+        outGame = true;
+        STOPGAME = false;
+        Combo miniCombo = new Combo();
+        Tile[][] board = new Tile[3][3];
+        Pane root = new Pane();
 
-    DataInputStream dis;
-    CLICKED = 0;
+        DataInputStream dis;
+        CLICKED = 0;
 
-    Thread updatableThread = null;
+        Thread updatableThread = null;
 
-    int level, passX = -1, passY = -1, posX = 0, posY = 0;
+        int level, passX = -1, passY = -1, posX = 0, posY = 0;
 
-    playable = true; turnX = true; firstround = true; returntox = false;
+        playable = true;
+        turnX = true;
+        firstround = true;
+        returntox = false;
 
-    winner=""; 
-    user = "X"; 
-    computer = "O"; xoro="";
-        
+        winner = "";
+        user = "X";
+        computer = "O";
+        xoro = "";
+
         if (replayThread != null) {
             replayThread.stop();
             replayThread = null;
@@ -596,88 +680,4 @@ public class TicGrid {
         returntox = false;
     }
 
-    public void handleIncomingRequests(boolean startMe) {
-        if (handleIncomingRequestsThread == null) {
-            //wait and draw from server
-            // first thing when initatiated 
-            // if I clicked mouse 
-            //      then> drawX()
-            // then> listen to serever()
-            //       when server responds
-            //          > drawO()
-            handleIncomingRequestsThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        try {
-                            threadMsgFromServer = client.message;
-                            threadMsgArrFromServer = threadMsgFromServer.split(",");
-                            Thread.sleep(500);
-                            System.out.println("Listeneing for incomming moves...");
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (threadMsgArrFromServer.length == 6) {
-                                        System.out.println("Message1 is == 6:>>> "+threadMsgFromServer);
-//                                        if (threadMsgFromServer.split(",")[5].equals(client.myName)) {
-                                            System.out.println("Message2 is == 6>>> "+threadMsgFromServer);
-                                            int x = parseInt(threadMsgFromServer.split(",")[3]);
-                                            int y = parseInt(threadMsgFromServer.split(",")[4]);
-                                            String turn = new String(threadMsgFromServer.split(",")[5]);
-                                            try {
-                                                if(turn.equals("non")){
-                                                    System.out.println("Message3 is == 6>>> "+threadMsgFromServer);
-                                                    System.out.println("drawing X.......");
-                                                    board[x][y].drawO();
-                                                    checkState();
-                                                }
-                                            } catch (ArrayIndexOutOfBoundsException e) {
-                                                System.out.println("That's a draw");
-                                                client.iWon = "draw";
-                                            }
-//                                        }
-                                    }
-                                turnX = true;
-                                }
-                            });
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-            }
-            );
-            handleIncomingRequestsThread.start();
-        }
-    }
-
-    public void handleOutGoingRequests() {
-//        wait for click, draw and send to server
-    }
-
-    //play,hossam,chris,0,0
-    public String playNetwork(String myName, String opponent, int posX, int posY) {
-        client.ps.println("play," + myName + "," + opponent + "," + posX + "," + posY);
-        boolean answerFlag = false;
-        while (!answerFlag) {
-            System.out.println("HAAAAI");
-            if (client.OK == 1) {
-                System.out.println("OK");
-                answerFlag = true;
-            }
-            if (client.OK == 0) {
-                System.out.println("NOT OK :(");
-                answerFlag = true;
-                client.OK = 2;
-            }
-        }
-        if (client.OK == 1) {
-            String response = client.getMessage();
-            client.OK = 2;
-            answerFlag = false;
-            System.out.println("SERVER RESPONSE" + response);
-            return response;
-        }
-        return "";
-    }
 }
