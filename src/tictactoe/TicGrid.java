@@ -42,7 +42,7 @@ public class TicGrid {
     GameType gameType;
     String threadMsgFromServer = "";
     String[] threadMsgArrFromServer;
-    static Thread replayThread = null, popUpthreadS = null, stateThread = null, checkStateThread = null;
+    static Thread replayThread = null, gameEndedPopupThreadS = null, stateThread = null, checkStateThread = null;
     static Thread handleIncomingRequestsThread = null;
     static Thread handleOutgoingRequestsThread = null;
     static boolean outGame = true, STOPGAME = false;
@@ -50,7 +50,6 @@ public class TicGrid {
     public final static ClientThread client = ClientThread.getInstance();
     public static Tile[][] board = new Tile[3][3];
     public final static Pane root = new Pane();
-//    public Text text = new Text();
     String FILENAME = "savelastgame.txt";
     MediaPlayer mediaplayer;
     Pane winvideo;
@@ -79,6 +78,9 @@ public class TicGrid {
     PrintWriter pW = null;
 
     Pane createContent(GameType type, int level) {
+        if(type == GameType.Room)
+            handleIncomingRequests(true);
+
         if (type != GameType.Replay) {
             try {
                 PrintWriter pW = new PrintWriter(FILENAME);
@@ -155,7 +157,7 @@ public class TicGrid {
                     client.iWon = "x";
                 } else if (winner == "X" && gameType == GameType.AI) {
                     System.out.println("the winner player is : " + winner);
-                    client.iWon = "x";
+                    client.iWon = "draw";
                 }
                 playWinAnimation(combo);
             }
@@ -177,8 +179,8 @@ public class TicGrid {
                 new KeyValue(line.endXProperty(), combo.tiles[2].getCenterX()),
                 new KeyValue(line.endYProperty(), combo.tiles[2].getCenterY())));
         timeline.play();
-        if(popUpthreadS==null){
-            popUpthreadS = new Thread(new Runnable() {
+        if(gameEndedPopupThreadS==null){
+            gameEndedPopupThreadS = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -187,7 +189,7 @@ public class TicGrid {
                             @Override
                             public void run() {
                                 Popup.display();
-                                popUpthreadS.stop();
+                                gameEndedPopupThreadS.stop();
                             }
                         });
                         Thread.sleep(100);
@@ -195,7 +197,7 @@ public class TicGrid {
                 }
             }
             );
-            popUpthreadS.start();
+            gameEndedPopupThreadS.start();
             
         }
     }
@@ -427,9 +429,11 @@ public class TicGrid {
                         break;
                     case Room:
                         if (event.getButton() == MouseButton.PRIMARY) {
-                            handleIncomingRequests(true);
-                            if (turnX) {
-                                runDrawThread();
+                            if (turnX){
+                                drawX();
+                                turnX = false;
+                                client.PLAY=false;
+//                                runDrawThread();
                                 String msg = playNetwork(client.myName, client.opponent, passX, passY);
                             }
                         }
@@ -511,15 +515,16 @@ public class TicGrid {
                 @Override
                 public void run() {
                     try {
-                        turnX = false;
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
                                 System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX");
-                                    drawX();
+                                drawX();
+                                turnX = false;
+                                client.PLAY = false;
                             }
                         });
-                        Thread.sleep(50);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                     }
                 }
@@ -544,37 +549,65 @@ public class TicGrid {
                 public void run() {
                     while (true) {
                         try {
-                            threadMsgFromServer = client.message;
-                            threadMsgArrFromServer = threadMsgFromServer.split(",");
-                            Thread.sleep(500);
                             System.out.println("Listeneing for incomming moves...");
+                            Thread.sleep(1000);
+                            threadMsgFromServer = client.message;
+//                            threadMsgArrFromServer = threadMsgFromServer.split(",");
                             Platform.runLater(new Runnable() {
                                 @Override
-                                public void run() {
-                                    if (threadMsgArrFromServer.length == 6) {
-                                        System.out.println("Message is == 6:>>> " + threadMsgFromServer);
-//                                        if (threadMsgFromServer.split(",")[5].equals(client.myName)) {
-                                        System.out.println("Message2 is == 6>>> " + threadMsgFromServer);
-                                        int x = parseInt(threadMsgFromServer.split(",")[3]);
-                                        int y = parseInt(threadMsgFromServer.split(",")[4]);
-                                        String turn = new String(threadMsgFromServer.split(",")[5]);
-                                        try {
-                                            if (turn.equals("non")) {
-                                                System.out.println("Message3 is == 6>>> " + threadMsgFromServer);
-                                                System.out.println("ENEMEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-                                                if(!turnX){
-                                                    board[x][y].drawO();
-                                                    turnX=true;                                                
-                                                }
-                                                checkState();
-                                            }
-                                        } catch (ArrayIndexOutOfBoundsException e) {
-                                            System.out.println("That's a draw");
-                                            client.iWon = "draw";
+                                public void run(){
+                                if(threadMsgFromServer.split(",")[1].equals(client.myName)){
+                                    if(threadMsgFromServer.split(",")[0].equals("play")){
+                                        if(threadMsgFromServer.split(",").length == 4){
+                                            if(threadMsgFromServer.split(",")[3].equals("-1"))
+                                                client.opponent = new String(threadMsgFromServer.split(",")[2]);
                                         }
-//                                        }
+
+                                        if (threadMsgFromServer.split(",").length == 6){
+                                            if(threadMsgFromServer.split(",")[5].equals(client.myName)){
+                                            }
+                                            else if(threadMsgFromServer.split(",")[5].equals("non")){
+                                                client.opponent = new String(threadMsgFromServer.split(",")[2]);
+                                                System.out.println("ENEMEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+                                                int x = parseInt(threadMsgFromServer.split(",")[3]);
+                                                System.out.println("[OPPONENET X]>>> " + x);
+                                                int y = parseInt(threadMsgFromServer.split(",")[4]);
+                                                System.out.println("[OPPONENET Y]>>> " + x);
+                                                board[x][y].drawO();
+                                                client.PLAY = true;
+                                                turnX=true;
+                                            }
+                                        }
                                     }
-                                    turnX = true;
+                                }
+                                    checkState();
+//                                    System.out.println("[threadMsgFromServer]>>> " + threadMsgFromServer);
+//                                    System.out.println("[threadMsgFromServer.split(\",\").length]>>> " + threadMsgFromServer.split(",").length);
+//                                    System.out.println("[client.PLAY]>>> " + client.PLAY);
+//                                    if (threadMsgFromServer.split(",").length == 6){
+//                                        if(threadMsgFromServer.split(",")[5].equals("non"))
+//                                            client.PLAY = false;
+//                                        System.out.println("[OPPONENET] played>>> " + threadMsgFromServer);
+//                                        int x = parseInt(threadMsgFromServer.split(",")[3]);
+//                                        System.out.println("[OPPONENET X]>>> " + x);
+//                                        int y = parseInt(threadMsgFromServer.split(",")[4]);
+//                                        System.out.println("[OPPONENET Y]>>> " + x);
+//                                        String turn = new String(threadMsgFromServer.split(",")[5]);
+//                                        System.out.println("[turn value]>>> " + turn);
+//                                        try{
+//                                            System.out.println("[Drawing opponent]>>> " + threadMsgFromServer);
+//                                            if (turn.equals(client.myName)){
+//                                                System.out.println("ENEMEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+//                                                board[x][y].drawO();
+//                                                client.PLAY = true;
+//                                                turnX=true;
+//                                                checkState();
+//                                            }
+//                                        } catch (ArrayIndexOutOfBoundsException e) {
+//                                            System.out.println("That's a draw");
+//                                            client.iWon = "draw";
+//                                        }
+//                                    }
                                 }
                             });
                             Thread.sleep(500);
@@ -591,14 +624,15 @@ public class TicGrid {
     //play,hossam,chris,0,0
     public String playNetwork(String myName, String opponent, int posX, int posY) {
         client.ps.println("play," + myName + "," + opponent + "," + posX + "," + posY);
+        turnX=false;
         boolean answerFlag = false;
         while (!answerFlag) {
             System.out.println("HAAAAI");
-            if (client.OK == 1) {
+            if (client.OK == 1){
                 System.out.println("OK");
                 answerFlag = true;
             }
-            if (client.OK == 0) {
+            if (client.OK == 0){
                 System.out.println("NOT OK :(");
                 answerFlag = true;
                 client.OK = 2;
@@ -618,7 +652,7 @@ public class TicGrid {
         threadMsgFromServer = "";
         String[] threadMsgArrFromServer;
         replayThread = null;
-        popUpthreadS = null;
+        gameEndedPopupThreadS = null;
         stateThread = null;
         checkStateThread = null;
         handleIncomingRequestsThread = null;

@@ -189,6 +189,7 @@ public class MainWindow extends AnchorPane {
                 w.setScene(s);
                 w.show();
                 mainWindow.close();
+                mainWindow=null;
             }
         });
 
@@ -202,7 +203,8 @@ public class MainWindow extends AnchorPane {
             @Override
             public void handle(ActionEvent event) {
                 client.ps.println("cancelGame"+","+client.myName);
-                System.out.println("ccaaanccclllleee");}
+                System.out.println("ccaaanccclllleee");
+            }
         });
 
         button.setId("button");
