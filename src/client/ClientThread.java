@@ -37,8 +37,8 @@ public class ClientThread extends Thread {
     private ClientThread(String name){
         try{
             System.out.println("Calling the client thread constructor");
-            mySocket = new Socket("hossamradwan.hopto.org", 5005);
-//            mySocket = new Socket("41.237.192.233", 5005);
+//            mySocket = new Socket("hossamradwan.hopto.org", 5005);
+            mySocket = new Socket(InetAddress.getLocalHost(), 5000);
             dis = new DataInputStream(mySocket.getInputStream());
             ps = new PrintStream(mySocket.getOutputStream());
             start();

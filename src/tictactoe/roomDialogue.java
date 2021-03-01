@@ -76,7 +76,7 @@ public class roomDialogue extends AnchorPane {
             client.ps.println(type+","+username+","+roomId);
             boolean answerFlag = false;
             while(!answerFlag){
-                System.out.println("HAAAAI");
+                System.out.println("Witing for player to connect");
                 if(client.OK == 1){
                     System.out.println("OK");
                     answerFlag=true;

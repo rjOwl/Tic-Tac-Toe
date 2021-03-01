@@ -110,15 +110,15 @@ public class MainWindow extends AnchorPane {
         //        radioButton.setMnemonicParsing(false);
         //        radioButton.setPrefHeight(17.0);
         //        radioButton.setPrefWidth(88.0);
-        levelLabel.setText("Level"+level);
+        levelLabel.setText("Level");
         levelLabel.setLayoutX(492.0);
         levelLabel.setLayoutY(40.0);
         comboBox.setLayoutX(492.0);
         comboBox.setLayoutY(27.0);
         comboBox.setValue("Levels");
-        comboBox.getItems().add("Level 1");
-        comboBox.getItems().add("Level 2");
-        comboBox.getItems().add("Level 3");
+        comboBox.getItems().add("Easy");
+//        comboBox.getItems().add("Level 2");
+        comboBox.getItems().add("Hard");
         comboBox.setOnAction((e) -> {
             level = comboBox.getSelectionModel().getSelectedIndex();
             level += 1;
